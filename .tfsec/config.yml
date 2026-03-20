@@ -1,0 +1,12 @@
+# tfsec Configuration for QuantumTrade
+minimum_severity: MEDIUM
+
+# Exclude specific checks with justification
+exclude:
+  # Example: Exclude check with business justification
+  # - aws-s3-enable-versioning
+
+# Severity overrides
+severity_overrides:
+  aws-s3-no-public-access-with-acl: CRITICAL
+  aws-ec2-no-public-ingress-sgr: CRITICAL

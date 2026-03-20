@@ -1,0 +1,28 @@
+# Checkov Configuration for QuantumTrade
+soft-fail: false
+compact: true
+directory:
+  - terraform/
+
+# Framework to scan
+framework:
+  - terraform
+
+# Output formats
+output:
+  - cli
+  - sarif
+
+# Skip checks that don't apply (with justification)
+skip-check:
+  # Skip VPC flow logs for dev environment only
+  # - CKV_AWS_23
+
+# External checks directory
+external-checks-dir:
+  - policies/checkov
+
+# Severity threshold (fail on HIGH and above)
+hard-fail-on:
+  - HIGH
+  - CRITICAL

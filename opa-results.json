@@ -1,0 +1,49 @@
+{
+  "ec2_instance_types": {
+    "allowed_production_families": [
+      "t3",
+      "m5",
+      "c5",
+      "r5"
+    ],
+    "deny": [],
+    "warn": []
+  },
+  "required_tags": {
+    "deny": [
+      "Resource aws_db_instance.main (aws_db_instance) is missing required tag: CostCenter",
+      "Resource aws_db_instance.main (aws_db_instance) is missing required tag: Environment",
+      "Resource aws_db_instance.main (aws_db_instance) is missing required tag: Owner",
+      "Resource aws_db_subnet_group.main (aws_db_subnet_group) is missing required tag: CostCenter",
+      "Resource aws_db_subnet_group.main (aws_db_subnet_group) is missing required tag: Environment",
+      "Resource aws_db_subnet_group.main (aws_db_subnet_group) is missing required tag: Owner",
+      "Resource aws_instance.app_server (aws_instance) is missing required tag: CostCenter",
+      "Resource aws_instance.app_server (aws_instance) is missing required tag: Environment",
+      "Resource aws_instance.app_server (aws_instance) is missing required tag: Owner",
+      "Resource aws_s3_bucket.data_bucket (aws_s3_bucket) is missing required tag: CostCenter",
+      "Resource aws_s3_bucket.data_bucket (aws_s3_bucket) is missing required tag: Owner",
+      "Resource aws_security_group.app_sg (aws_security_group) is missing required tag: CostCenter",
+      "Resource aws_security_group.app_sg (aws_security_group) is missing required tag: Environment",
+      "Resource aws_security_group.app_sg (aws_security_group) is missing required tag: Owner",
+      "Resource aws_subnet.private (aws_subnet) is missing required tag: CostCenter",
+      "Resource aws_subnet.private (aws_subnet) is missing required tag: Environment",
+      "Resource aws_subnet.private (aws_subnet) is missing required tag: Owner",
+      "Resource aws_subnet.private_2 (aws_subnet) is missing required tag: CostCenter",
+      "Resource aws_subnet.private_2 (aws_subnet) is missing required tag: Environment",
+      "Resource aws_subnet.private_2 (aws_subnet) is missing required tag: Owner",
+      "Resource aws_vpc.main (aws_vpc) is missing required tag: CostCenter",
+      "Resource aws_vpc.main (aws_vpc) is missing required tag: Environment",
+      "Resource aws_vpc.main (aws_vpc) is missing required tag: Owner"
+    ],
+    "required_tags": [
+      "Environment",
+      "Owner",
+      "CostCenter"
+    ],
+    "warn": []
+  },
+  "s3_versioning": {
+    "deny": [],
+    "warn": []
+  }
+}

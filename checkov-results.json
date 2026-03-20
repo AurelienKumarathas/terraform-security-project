@@ -1,0 +1,4164 @@
+{
+    "check_type": "terraform",
+    "results": {
+        "passed_checks": [
+            {
+                "check_id": "CKV_AWS_41",
+                "bc_check_id": "BC_AWS_SECRETS_5",
+                "check_name": "Ensure no hard coded AWS access key and secret key exists in provider",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": []
+                },
+                "code_block": [
+                    [
+                        14,
+                        "provider \"aws\" {\n"
+                    ],
+                    [
+                        15,
+                        "  region = var.aws_region\n"
+                    ],
+                    [
+                        16,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    14,
+                    16
+                ],
+                "resource": "aws.default",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.provider.aws.credentials",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/secrets-policies/bc-aws-secrets-5",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "region": [
+                        {
+                            "type": "variable",
+                            "name": "aws_region",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_93",
+                "bc_check_id": "BC_AWS_S3_24",
+                "check_name": "Ensure S3 bucket policy does not lockout all but root user. (Prevent lockouts needing root account fixes)",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "policy"
+                    ]
+                },
+                "code_block": [
+                    [
+                        19,
+                        "resource \"aws_s3_bucket\" \"data_bucket\" {\n"
+                    ],
+                    [
+                        20,
+                        "  bucket = \"quantumtrade-transaction-data\"\n"
+                    ],
+                    [
+                        21,
+                        "\n"
+                    ],
+                    [
+                        22,
+                        "  tags = {\n"
+                    ],
+                    [
+                        23,
+                        "    Name        = \"Transaction Data\"\n"
+                    ],
+                    [
+                        24,
+                        "    Environment = var.environment\n"
+                    ],
+                    [
+                        25,
+                        "  }\n"
+                    ],
+                    [
+                        26,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    19,
+                    26
+                ],
+                "resource": "aws_s3_bucket.data_bucket",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.S3ProtectAgainstPolicyLockout",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Environment": "production",
+                    "Name": "Transaction Data"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/s3-policies/bc-aws-s3-24",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "tags.Environment": [
+                        {
+                            "type": "variable",
+                            "name": "environment",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_260",
+                "bc_check_id": "BC_AWS_NETWORKING_67",
+                "check_name": "Ensure no security groups allow ingress from 0.0.0.0:0 to port 80",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": []
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupUnrestrictedIngress80",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/ensure-aws-security-groups-do-not-allow-ingress-from-00000-to-port-80",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_277",
+                "bc_check_id": "BC_AWS_NETWORKING_78",
+                "check_name": "Ensure no security groups allow ingress from 0.0.0.0:0 to port -1",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": []
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupUnrestrictedIngressAny",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/ensure-aws-security-group-does-not-allow-all-traffic-on-all-ports",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_25",
+                "bc_check_id": "BC_AWS_NETWORKING_2",
+                "check_name": "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": []
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupUnrestrictedIngress3389",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/networking-2",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_88",
+                "bc_check_id": "BC_AWS_PUBLIC_12",
+                "check_name": "EC2 instance should not have public IP.",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "associate_public_ip_address"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.EC2PublicIP",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/public-policies/public-12",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_46",
+                "bc_check_id": "BC_AWS_SECRETS_1",
+                "check_name": "Ensure no hard-coded secrets exist in EC2 user data",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "user_data"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.EC2Credentials",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/secrets-policies/bc-aws-secrets-1",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_130",
+                "bc_check_id": "BC_AWS_NETWORKING_53",
+                "check_name": "Ensure VPC subnets do not assign public IP by default",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "map_public_ip_on_launch"
+                    ]
+                },
+                "code_block": [
+                    [
+                        98,
+                        "resource \"aws_subnet\" \"private\" {\n"
+                    ],
+                    [
+                        99,
+                        "  vpc_id            = aws_vpc.main.id\n"
+                    ],
+                    [
+                        100,
+                        "  cidr_block        = \"10.0.1.0/24\"\n"
+                    ],
+                    [
+                        101,
+                        "  availability_zone = \"${var.aws_region}a\"\n"
+                    ],
+                    [
+                        102,
+                        "\n"
+                    ],
+                    [
+                        103,
+                        "  tags = {\n"
+                    ],
+                    [
+                        104,
+                        "    Name = \"Private Subnet\"\n"
+                    ],
+                    [
+                        105,
+                        "  }\n"
+                    ],
+                    [
+                        106,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    98,
+                    106
+                ],
+                "resource": "aws_subnet.private",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SubnetPublicIP",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "Private Subnet"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/ensure-vpc-subnets-do-not-assign-public-ip-by-default",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "availability_zone": [
+                        {
+                            "type": "variable",
+                            "name": "aws_region",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_354",
+                "bc_check_id": "BC_AWS_GENERAL_254",
+                "check_name": "Ensure RDS Performance Insights are encrypted using KMS CMKs",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "performance_insights_kms_key_id"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSInstancePerfInsightsEncryptionWithCMK",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/bc-aws-354",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_388",
+                "bc_check_id": null,
+                "check_name": "Ensure AWS Aurora PostgreSQL is not exposed to local file read vulnerability",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": []
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.UnpatchedAuroraPostgresDB",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": {},
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_133",
+                "bc_check_id": "BC_AWS_GENERAL_46",
+                "check_name": "Ensure that RDS instances has backup policy",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "backup_retention_period"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.DBInstanceBackupRetentionPeriod",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-that-rds-instances-have-backup-policy",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_17",
+                "bc_check_id": "BC_AWS_PUBLIC_2",
+                "check_name": "Ensure all data stored in RDS is not publicly accessible",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "publicly_accessible"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSPubliclyAccessible",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/public-policies/public-2",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_211",
+                "bc_check_id": "BC_AWS_GENERAL_118",
+                "check_name": "Ensure RDS uses a modern CaCert",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "ca_cert_identifier"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSCACertIsRecent",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-aws-rds-uses-a-modern-cacert",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_130",
+                "bc_check_id": "BC_AWS_NETWORKING_53",
+                "check_name": "Ensure VPC subnets do not assign public IP by default",
+                "check_result": {
+                    "result": "PASSED",
+                    "evaluated_keys": [
+                        "map_public_ip_on_launch"
+                    ]
+                },
+                "code_block": [
+                    [
+                        143,
+                        "resource \"aws_subnet\" \"private_2\" {\n"
+                    ],
+                    [
+                        144,
+                        "  vpc_id            = aws_vpc.main.id\n"
+                    ],
+                    [
+                        145,
+                        "  cidr_block        = \"10.0.2.0/24\"\n"
+                    ],
+                    [
+                        146,
+                        "  availability_zone = \"${var.aws_region}b\"\n"
+                    ],
+                    [
+                        147,
+                        "\n"
+                    ],
+                    [
+                        148,
+                        "  tags = {\n"
+                    ],
+                    [
+                        149,
+                        "    Name = \"Private Subnet 2\"\n"
+                    ],
+                    [
+                        150,
+                        "  }\n"
+                    ],
+                    [
+                        151,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    143,
+                    151
+                ],
+                "resource": "aws_subnet.private_2",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SubnetPublicIP",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "Private Subnet 2"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/ensure-vpc-subnets-do-not-assign-public-ip-by-default",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "availability_zone": [
+                        {
+                            "type": "variable",
+                            "name": "aws_region",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            }
+        ],
+        "failed_checks": [
+            {
+                "check_id": "CKV_AWS_53",
+                "bc_check_id": "BC_AWS_S3_19",
+                "check_name": "Ensure S3 bucket has block public ACLS enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "block_public_acls"
+                    ]
+                },
+                "code_block": [
+                    [
+                        29,
+                        "resource \"aws_s3_bucket_public_access_block\" \"data_bucket_pab\" {\n"
+                    ],
+                    [
+                        30,
+                        "  bucket = aws_s3_bucket.data_bucket.id\n"
+                    ],
+                    [
+                        31,
+                        "\n"
+                    ],
+                    [
+                        32,
+                        "  block_public_acls       = false  # Should be true\n"
+                    ],
+                    [
+                        33,
+                        "  block_public_policy     = false  # Should be true\n"
+                    ],
+                    [
+                        34,
+                        "  ignore_public_acls      = false  # Should be true\n"
+                    ],
+                    [
+                        35,
+                        "  restrict_public_buckets = false  # Should be true\n"
+                    ],
+                    [
+                        36,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    29,
+                    36
+                ],
+                "resource": "aws_s3_bucket_public_access_block.data_bucket_pab",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.S3BlockPublicACLs",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/s3-policies/bc-aws-s3-19",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_54",
+                "bc_check_id": "BC_AWS_S3_20",
+                "check_name": "Ensure S3 bucket has block public policy enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "block_public_policy"
+                    ]
+                },
+                "code_block": [
+                    [
+                        29,
+                        "resource \"aws_s3_bucket_public_access_block\" \"data_bucket_pab\" {\n"
+                    ],
+                    [
+                        30,
+                        "  bucket = aws_s3_bucket.data_bucket.id\n"
+                    ],
+                    [
+                        31,
+                        "\n"
+                    ],
+                    [
+                        32,
+                        "  block_public_acls       = false  # Should be true\n"
+                    ],
+                    [
+                        33,
+                        "  block_public_policy     = false  # Should be true\n"
+                    ],
+                    [
+                        34,
+                        "  ignore_public_acls      = false  # Should be true\n"
+                    ],
+                    [
+                        35,
+                        "  restrict_public_buckets = false  # Should be true\n"
+                    ],
+                    [
+                        36,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    29,
+                    36
+                ],
+                "resource": "aws_s3_bucket_public_access_block.data_bucket_pab",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.S3BlockPublicPolicy",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/s3-policies/bc-aws-s3-20",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_55",
+                "bc_check_id": "BC_AWS_S3_21",
+                "check_name": "Ensure S3 bucket has ignore public ACLs enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "ignore_public_acls"
+                    ]
+                },
+                "code_block": [
+                    [
+                        29,
+                        "resource \"aws_s3_bucket_public_access_block\" \"data_bucket_pab\" {\n"
+                    ],
+                    [
+                        30,
+                        "  bucket = aws_s3_bucket.data_bucket.id\n"
+                    ],
+                    [
+                        31,
+                        "\n"
+                    ],
+                    [
+                        32,
+                        "  block_public_acls       = false  # Should be true\n"
+                    ],
+                    [
+                        33,
+                        "  block_public_policy     = false  # Should be true\n"
+                    ],
+                    [
+                        34,
+                        "  ignore_public_acls      = false  # Should be true\n"
+                    ],
+                    [
+                        35,
+                        "  restrict_public_buckets = false  # Should be true\n"
+                    ],
+                    [
+                        36,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    29,
+                    36
+                ],
+                "resource": "aws_s3_bucket_public_access_block.data_bucket_pab",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.S3IgnorePublicACLs",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/s3-policies/bc-aws-s3-21",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_56",
+                "bc_check_id": "BC_AWS_S3_22",
+                "check_name": "Ensure S3 bucket has 'restrict_public_buckets' enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "restrict_public_buckets"
+                    ]
+                },
+                "code_block": [
+                    [
+                        29,
+                        "resource \"aws_s3_bucket_public_access_block\" \"data_bucket_pab\" {\n"
+                    ],
+                    [
+                        30,
+                        "  bucket = aws_s3_bucket.data_bucket.id\n"
+                    ],
+                    [
+                        31,
+                        "\n"
+                    ],
+                    [
+                        32,
+                        "  block_public_acls       = false  # Should be true\n"
+                    ],
+                    [
+                        33,
+                        "  block_public_policy     = false  # Should be true\n"
+                    ],
+                    [
+                        34,
+                        "  ignore_public_acls      = false  # Should be true\n"
+                    ],
+                    [
+                        35,
+                        "  restrict_public_buckets = false  # Should be true\n"
+                    ],
+                    [
+                        36,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    29,
+                    36
+                ],
+                "resource": "aws_s3_bucket_public_access_block.data_bucket_pab",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.S3RestrictPublicBuckets",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/s3-policies/bc-aws-s3-22",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_24",
+                "bc_check_id": "BC_AWS_NETWORKING_1",
+                "check_name": "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "ingress/[0]/from_port",
+                        "ingress/[0]/to_port",
+                        "ingress/[0]/cidr_blocks",
+                        "ingress/[0]/ipv6_cidr_blocks"
+                    ]
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupUnrestrictedIngress22",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/networking-1-port-security",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_23",
+                "bc_check_id": "BC_AWS_NETWORKING_31",
+                "check_name": "Ensure every security group and rule has a description",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "description",
+                        "egress/[0]"
+                    ]
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupRuleDescription",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/networking-31",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_382",
+                "bc_check_id": "BC_AWS_IAM_93",
+                "check_name": "Ensure no security groups allow egress from 0.0.0.0:0 to port -1",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "egress/[0]/from_port",
+                        "egress/[0]/to_port",
+                        "egress/[0]/cidr_blocks",
+                        "egress/[0]/ipv6_cidr_blocks"
+                    ]
+                },
+                "code_block": [
+                    [
+                        39,
+                        "resource \"aws_security_group\" \"app_sg\" {\n"
+                    ],
+                    [
+                        40,
+                        "  name        = \"quantumtrade-app-sg\"\n"
+                    ],
+                    [
+                        41,
+                        "  description = \"Security group for application servers\"\n"
+                    ],
+                    [
+                        42,
+                        "  vpc_id      = aws_vpc.main.id\n"
+                    ],
+                    [
+                        43,
+                        "\n"
+                    ],
+                    [
+                        44,
+                        "  # BAD: Allows SSH from anywhere\n"
+                    ],
+                    [
+                        45,
+                        "  ingress {\n"
+                    ],
+                    [
+                        46,
+                        "    from_port   = 22\n"
+                    ],
+                    [
+                        47,
+                        "    to_port     = 22\n"
+                    ],
+                    [
+                        48,
+                        "    protocol    = \"tcp\"\n"
+                    ],
+                    [
+                        49,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        50,
+                        "    description = \"SSH access\"\n"
+                    ],
+                    [
+                        51,
+                        "  }\n"
+                    ],
+                    [
+                        52,
+                        "\n"
+                    ],
+                    [
+                        53,
+                        "  # BAD: Allows all outbound traffic\n"
+                    ],
+                    [
+                        54,
+                        "  egress {\n"
+                    ],
+                    [
+                        55,
+                        "    from_port   = 0\n"
+                    ],
+                    [
+                        56,
+                        "    to_port     = 0\n"
+                    ],
+                    [
+                        57,
+                        "    protocol    = \"-1\"\n"
+                    ],
+                    [
+                        58,
+                        "    cidr_blocks = [\"0.0.0.0/0\"]\n"
+                    ],
+                    [
+                        59,
+                        "  }\n"
+                    ],
+                    [
+                        60,
+                        "\n"
+                    ],
+                    [
+                        61,
+                        "  tags = {\n"
+                    ],
+                    [
+                        62,
+                        "    Name = \"App Security Group\"\n"
+                    ],
+                    [
+                        63,
+                        "  }\n"
+                    ],
+                    [
+                        64,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    39,
+                    64
+                ],
+                "resource": "aws_security_group.app_sg",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.SecurityGroupUnrestrictedEgressAny",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Security Group"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/bc-aws-382",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf"
+            },
+            {
+                "check_id": "CKV_AWS_79",
+                "bc_check_id": "BC_AWS_GENERAL_31",
+                "check_name": "Ensure Instance Metadata Service Version 1 is not enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "metadata_options/[0]/http_tokens"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.IMDSv1Disabled",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/bc-aws-general-31",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_126",
+                "bc_check_id": "BC_AWS_LOGGING_26",
+                "check_name": "Ensure that detailed monitoring is enabled for EC2 instances",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "monitoring"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.EC2DetailedMonitoringEnabled",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-logging-policies/ensure-that-detailed-monitoring-is-enabled-for-ec2-instances",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_135",
+                "bc_check_id": "BC_AWS_GENERAL_68",
+                "check_name": "Ensure that EC2 is EBS optimized",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "ebs_optimized"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.EC2EBSOptimized",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-that-ec2-is-ebs-optimized",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_8",
+                "bc_check_id": "BC_AWS_GENERAL_13",
+                "check_name": "Ensure all data stored in the Launch configuration or instance Elastic Blocks Store is securely encrypted",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "root_block_device",
+                        "ebs_block_device"
+                    ]
+                },
+                "code_block": [
+                    [
+                        67,
+                        "resource \"aws_instance\" \"app_server\" {\n"
+                    ],
+                    [
+                        68,
+                        "  ami           = var.ami_id\n"
+                    ],
+                    [
+                        69,
+                        "  instance_type = \"t3.medium\"\n"
+                    ],
+                    [
+                        70,
+                        "\n"
+                    ],
+                    [
+                        71,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        72,
+                        "  subnet_id              = aws_subnet.private.id\n"
+                    ],
+                    [
+                        73,
+                        "\n"
+                    ],
+                    [
+                        74,
+                        "  # Missing: IMDSv2 requirement\n"
+                    ],
+                    [
+                        75,
+                        "  # Missing: EBS encryption\n"
+                    ],
+                    [
+                        76,
+                        "\n"
+                    ],
+                    [
+                        77,
+                        "  root_block_device {\n"
+                    ],
+                    [
+                        78,
+                        "    volume_size = 50\n"
+                    ],
+                    [
+                        79,
+                        "    encrypted   = false  # Should be true\n"
+                    ],
+                    [
+                        80,
+                        "  }\n"
+                    ],
+                    [
+                        81,
+                        "\n"
+                    ],
+                    [
+                        82,
+                        "  tags = {\n"
+                    ],
+                    [
+                        83,
+                        "    Name = \"App Server\"\n"
+                    ],
+                    [
+                        84,
+                        "  }\n"
+                    ],
+                    [
+                        85,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    67,
+                    85
+                ],
+                "resource": "aws_instance.app_server",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.LaunchConfigurationEBSEncryption",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "App Server"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/general-13",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "ami": [
+                        {
+                            "type": "variable",
+                            "name": "ami_id",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/variables.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_161",
+                "bc_check_id": "BC_AWS_IAM_65",
+                "check_name": "Ensure RDS database has IAM authentication enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "iam_database_authentication_enabled"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSIAMAuthentication",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-iam-policies/ensure-rds-database-has-iam-authentication-enabled",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_293",
+                "bc_check_id": "BC_AWS_GENERAL_208",
+                "check_name": "Ensure that AWS database instances have deletion protection enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "deletion_protection"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSInstanceDeletionProtection",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/bc-aws-293",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_353",
+                "bc_check_id": "BC_AWS_LOGGING_47",
+                "check_name": "Ensure that RDS instances have performance insights enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "performance_insights_enabled"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSInstancePerformanceInsights",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-logging-policies/bc-aws-353",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_157",
+                "bc_check_id": "BC_AWS_GENERAL_73",
+                "check_name": "Ensure that RDS instances have Multi-AZ enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "multi_az"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSMultiAZEnabled",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/general-73",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_129",
+                "bc_check_id": "BC_AWS_IAM_60",
+                "check_name": "Ensure that respective logs of Amazon Relational Database Service (Amazon RDS) are enabled",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "enabled_cloudwatch_logs_exports/[0]"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.DBInstanceLogging",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-iam-policies/ensure-that-respective-logs-of-amazon-relational-database-service-amazon-rds-are-enabled",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_226",
+                "bc_check_id": "BC_AWS_GENERAL_121",
+                "check_name": "Ensure DB instance gets all minor upgrades automatically",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "auto_minor_version_upgrade"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.DBInstanceMinorUpgrade",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-aws-db-instance-gets-all-minor-upgrades-automatically",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_118",
+                "bc_check_id": "BC_AWS_LOGGING_28",
+                "check_name": "Ensure that enhanced monitoring is enabled for Amazon RDS instances",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "monitoring_interval"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSEnhancedMonitorEnabled",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-logging-policies/ensure-that-enhanced-monitoring-is-enabled-for-amazon-rds-instances",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            },
+            {
+                "check_id": "CKV_AWS_16",
+                "bc_check_id": "BC_AWS_GENERAL_4",
+                "check_name": "Ensure all data stored in the RDS is securely encrypted at rest",
+                "check_result": {
+                    "result": "FAILED",
+                    "evaluated_keys": [
+                        "storage_encrypted"
+                    ]
+                },
+                "code_block": [
+                    [
+                        109,
+                        "resource \"aws_db_instance\" \"main\" {\n"
+                    ],
+                    [
+                        110,
+                        "  identifier        = \"quantumtrade-db\"\n"
+                    ],
+                    [
+                        111,
+                        "  engine            = \"postgres\"\n"
+                    ],
+                    [
+                        112,
+                        "  engine_version    = \"14\"\n"
+                    ],
+                    [
+                        113,
+                        "  instance_class    = \"db.t3.medium\"\n"
+                    ],
+                    [
+                        114,
+                        "  allocated_storage = 100\n"
+                    ],
+                    [
+                        115,
+                        "\n"
+                    ],
+                    [
+                        116,
+                        "  db_name  = \"quantumtrade\"\n"
+                    ],
+                    [
+                        117,
+                        "  username = \"admin\"\n"
+                    ],
+                    [
+                        118,
+                        "  password = var**********\n"
+                    ],
+                    [
+                        119,
+                        "\n"
+                    ],
+                    [
+                        120,
+                        "  vpc_security_group_ids = [aws_security_group.app_sg.id]\n"
+                    ],
+                    [
+                        121,
+                        "  db_subnet_group_name   = aws_db_subnet_group.main.name\n"
+                    ],
+                    [
+                        122,
+                        "\n"
+                    ],
+                    [
+                        123,
+                        "  storage_encrypted = false  # Should be true\n"
+                    ],
+                    [
+                        124,
+                        "\n"
+                    ],
+                    [
+                        125,
+                        "  # Missing: deletion protection\n"
+                    ],
+                    [
+                        126,
+                        "  # Missing: backup retention\n"
+                    ],
+                    [
+                        127,
+                        "  # Missing: multi-AZ\n"
+                    ],
+                    [
+                        128,
+                        "\n"
+                    ],
+                    [
+                        129,
+                        "  tags = {\n"
+                    ],
+                    [
+                        130,
+                        "    Name = \"QuantumTrade Database\"\n"
+                    ],
+                    [
+                        131,
+                        "  }\n"
+                    ],
+                    [
+                        132,
+                        "}\n"
+                    ]
+                ],
+                "file_path": "/main.tf",
+                "file_abs_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "repo_file_path": "/terraform/main.tf",
+                "file_line_range": [
+                    109,
+                    132
+                ],
+                "resource": "aws_db_instance.main",
+                "evaluations": null,
+                "check_class": "checkov.terraform.checks.resource.aws.RDSEncryption",
+                "fixed_definition": null,
+                "entity_tags": {
+                    "Name": "QuantumTrade Database"
+                },
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/general-4",
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                "breadcrumbs": {
+                    "db_subnet_group_name": [
+                        {
+                            "type": "resource",
+                            "name": "aws_db_subnet_group.main",
+                            "path": "/Users/aurelienkumarathas/Desktop/Projects/terraform-security-project/terraform/main.tf",
+                            "module_connection": false
+                        }
+                    ]
+                }
+            }
+        ],
+        "skipped_checks": [],
+        "parsing_errors": []
+    },
+    "summary": {
+        "passed": 14,
+        "failed": 19,
+        "skipped": 0,
+        "parsing_errors": 0,
+        "resource_count": 9,
+        "checkov_version": "3.2.510"
+    },
+    "url": "Add an api key '--bc-api-key <api-key>' to see more detailed insights via https://bridgecrew.cloud"
+}
