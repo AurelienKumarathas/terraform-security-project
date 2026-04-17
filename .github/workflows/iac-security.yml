@@ -36,7 +36,6 @@ jobs:
           output_format: cli,sarif
           output_file_path: console,checkov-results.sarif
           soft_fail: false
-          skip_check: ''
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@v3
@@ -85,7 +84,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: 0.63.0
 
       - name: Run OPA Policies
         run: |
@@ -95,11 +94,14 @@ jobs:
 
           for policy in policies/opa/*.rego; do
             echo "Evaluating: $policy"
-            RESULT=$(opa eval --data "$policy" \
+            pkg=$(basename "$policy" .rego)
+            RESULT=$(opa eval \
+              --data "$policy" \
               --input terraform/tfplan.json \
-              "data.terraform" --format json)
-  
-            DENIES=$(echo "$RESULT" | jq -r '.. | .deny? // empty | .[]' 2>/dev/null)
+              "data.terraform.${pkg}.deny" \
+              --format json)
+
+            DENIES=$(echo "$RESULT" | jq -r '.result[0].expressions[0].value[]?' 2>/dev/null)
             if [ -n "$DENIES" ]; then
               echo "::error::Policy violations found in $policy"
               echo "$DENIES"
@@ -112,7 +114,7 @@ jobs:
           fi
 
           echo "All OPA policies passed!"
-  
+
   # ==========================================
   # Terraform Validate
   # ==========================================
