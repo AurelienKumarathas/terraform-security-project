@@ -1,37 +1,8 @@
 # Secure S3 Bucket Module
-# All security configurations are enforced by default
+# KMS encryption, public access block, versioning, logging, and lifecycle rules
+# enforced by default — callers cannot opt out of security controls.
+# Variables are defined in variables.tf — outputs in outputs.tf
 
-variable "bucket_name" {
-  description = "Name of the S3 bucket"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment (production/staging/development)"
-  type        = string
-  validation {
-    condition     = contains(["production", "staging", "development"], var.environment)
-    error_message = "Environment must be production, staging, or development."
-  }
-}
-
-variable "owner" {
-  description = "Team that owns this bucket"
-  type        = string
-}
-
-variable "cost_center" {
-  description = "Cost center for billing"
-  type        = string
-}
-
-variable "enable_versioning" {
-  description = "Enable versioning (required for production)"
-  type        = bool
-  default     = true
-}
-
-# The S3 bucket with security configurations
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
 
@@ -44,7 +15,7 @@ resource "aws_s3_bucket" "this" {
   }
 }
 
-# SECURITY: Enable server-side encryption
+# SECURITY: Server-side encryption with KMS
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -56,7 +27,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   }
 }
 
-# SECURITY: Block all public access
+# SECURITY: Block all public access — hardcoded, not configurable by callers
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -66,7 +37,7 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-# SECURITY: Enable versioning
+# SECURITY: Enable versioning for point-in-time recovery
 resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -75,15 +46,16 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
-# SECURITY: Enable access logging
+# SECURITY: Access logging for audit trail
 resource "aws_s3_bucket_logging" "this" {
-  bucket = aws_s3_bucket.this.id
+  count = var.log_bucket_id != "" ? 1 : 0
 
+  bucket        = aws_s3_bucket.this.id
   target_bucket = var.log_bucket_id
   target_prefix = "${var.bucket_name}/"
 }
 
-# SECURITY: Lifecycle rules for cost management
+# COST + COMPLIANCE: Lifecycle rules — tiering and version expiry
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -104,20 +76,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     noncurrent_version_expiration {
       noncurrent_days = 90
     }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
-}
-
-variable "log_bucket_id" {
-  description = "ID of the logging bucket"
-  type        = string
-}
-
-output "bucket_id" {
-  description = "ID of the created bucket"
-  value       = aws_s3_bucket.this.id
-}
-
-output "bucket_arn" {
-  description = "ARN of the created bucket"
-  value       = aws_s3_bucket.this.arn
 }

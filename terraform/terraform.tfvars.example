@@ -1,0 +1,17 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and populate values before running.
+# NEVER commit terraform.tfvars — it is gitignored.
+
+# AWS region — default is eu-west-2 (London)
+# aws_region = "eu-west-2"
+
+# Deployment environment
+# environment = "production"
+
+# AMI ID — Amazon Linux 2023 in eu-west-2
+# Find the latest: aws ssm get-parameter --name /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 --region eu-west-2
+# ami_id = "ami-0e8a34246278c21e4"
+
+# RDS master password — use a strong random value in production
+# In CI/CD this is provided via TF_VAR_db_password environment variable
+# db_password = "REPLACE_WITH_STRONG_PASSWORD"
