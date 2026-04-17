@@ -1,5 +1,7 @@
 # Terraform IaC Security Pipeline — QuantumTrade
 
+[![IaC Security Pipeline](https://github.com/aurelienkumarathas/terraform-security-project/actions/workflows/iac-security.yml/badge.svg)](https://github.com/aurelienkumarathas/terraform-security-project/actions/workflows/iac-security.yml)
+
 ![Checkov](https://img.shields.io/badge/Checkov-v3.2.510-brightgreen)
 ![tfsec](https://img.shields.io/badge/tfsec-v1.28.14-brightgreen)
 ![OPA](https://img.shields.io/badge/OPA-v0.71-brightgreen)
