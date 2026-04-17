@@ -82,25 +82,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Terraform Init
-        working-directory: terraform/
-        run: terraform init -backend=false
-
-      - name: Terraform Plan
-        working-directory: terraform/
-        run: terraform plan -out=tfplan
-        env:
-          TF_VAR_db_password: "dummy-for-ci"
-
-      - name: Convert Plan to JSON
-        working-directory: terraform/
-        run: terraform show -json tfplan > tfplan.json
-
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
@@ -110,14 +91,14 @@ jobs:
         run: |
           echo "Running OPA policy evaluation..."
 
-          # Run each policy and collect results
           FAILED=0
 
           for policy in policies/opa/*.rego; do
             echo "Evaluating: $policy"
-            RESULT=$(opa eval --data "$policy" --input terraform/tfplan.json "data.terraform" --format json)
-
-            # Check for deny rules
+            RESULT=$(opa eval --data "$policy" \
+              --input terraform/tfplan.json \
+              "data.terraform" --format json)
+  
             DENIES=$(echo "$RESULT" | jq -r '.. | .deny? // empty | .[]' 2>/dev/null)
             if [ -n "$DENIES" ]; then
               echo "::error::Policy violations found in $policy"
@@ -131,7 +112,7 @@ jobs:
           fi
 
           echo "All OPA policies passed!"
-
+  
   # ==========================================
   # Terraform Validate
   # ==========================================
