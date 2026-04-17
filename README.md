@@ -162,6 +162,16 @@ All resources in the original `main.tf` were missing required business tags. Wit
 | `aws_subnet.private_2` | ❌ | ❌ | ❌ |
 | `aws_vpc.main` | ❌ | ❌ | ❌ |
 
+## Remediation Impact
+
+| | Before (main.tf) | After (modules/) |
+|---|---|---|
+| Checkov failures | 19 | 2 |
+| tfsec failures | 19 | 1 |
+| Critical issues | 2 | 0 |
+| OPA violations | 23 | 0 |
+| **Risk reduction** | | **89–95%** |
+
 ---
 
 ## Secure Module Design
