@@ -1,4 +1,25 @@
+# Terraform
 terraform/tfplan
 terraform/tfplan.json
 terraform/.terraform/
 terraform/.terraform.lock.hcl
+terraform/*.test.tf
+
+# CI scan artefacts - uploaded to GitHub Security tab via SARIF, not committed
+*.sarif
+checkov-results.json
+checkov-modules-results.txt
+tfsec-results.json
+tfsec-modules-results.txt
+opa-results.json
+results.sarif
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
