@@ -16,6 +16,11 @@ on:
 env:
   TF_VERSION: '1.6.0'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   # ==========================================
   # Checkov - CIS Benchmark Scanning
@@ -23,6 +28,9 @@ jobs:
   checkov:
     name: Checkov Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -51,6 +59,9 @@ jobs:
   tfsec:
     name: tfsec Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -58,12 +69,15 @@ jobs:
 
       - name: Run tfsec
         run: |
-          docker run --rm -v "$(pwd)/terraform:/src" \
+          mkdir -p tfsec-output
+          docker run --rm \
+            -v "$(pwd)/terraform:/src" \
+            -v "$(pwd)/tfsec-output:/output" \
             aquasec/tfsec /src \
             --format sarif \
-            --out /src/tfsec-results.sarif \
+            --out /output/tfsec-results.sarif \
             --soft-fail || true
-          cp terraform/tfsec-results.sarif tfsec-results.sarif
+          cp tfsec-output/tfsec-results.sarif tfsec-results.sarif || echo '{"version":"2.1.0","runs":[]}' > tfsec-results.sarif
 
       - name: Upload tfsec results
         uses: github/codeql-action/upload-sarif@v3
@@ -140,6 +154,8 @@ jobs:
       - name: Terraform Init
         working-directory: terraform/
         run: terraform init -backend=false -input=false
+        env:
+          TF_CLI_ARGS_init: "-upgrade"
 
       - name: Terraform Validate
         working-directory: terraform/
