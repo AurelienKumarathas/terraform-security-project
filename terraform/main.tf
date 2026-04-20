@@ -191,7 +191,7 @@ resource "aws_security_group" "app_sg" {
 # S3 Buckets (via hardened module)
 # ==========================================
 
-# Dedicated logging bucket — receives access logs from all other buckets
+# Dedicated logging bucket - receives access logs from all other buckets
 module "log_bucket" {
   source = "./modules/s3"
 

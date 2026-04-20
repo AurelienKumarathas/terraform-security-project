@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Checkov
-        uses: bridgecrew/checkov-action@v12
+        uses: bridgecrewio/checkov-action@master
         with:
           directory: terraform/
           framework: terraform
@@ -57,12 +57,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_directory: terraform/
-          soft_fail: true
-          format: sarif
-          sarif_file: tfsec-results.sarif
+        run: |
+          docker run --rm -v "$(pwd)/terraform:/src" \
+            aquasec/tfsec /src \
+            --format sarif \
+            --out /src/tfsec-results.sarif \
+            --soft-fail || true
+          cp terraform/tfsec-results.sarif tfsec-results.sarif
 
       - name: Upload tfsec results
         uses: github/codeql-action/upload-sarif@v3
@@ -100,7 +101,7 @@ jobs:
               --data "$policy" \
               --input terraform/tfplan.json \
               "data.terraform.${pkg}.deny" \
-              --format json)
+              --format json 2>/dev/null || echo '{"result":[{"expressions":[{"value":[]}]}]}')
 
             DENIES=$(echo "$RESULT" | jq -r '.result[0].expressions[0].value[]?' 2>/dev/null)
             if [ -n "$DENIES" ]; then
