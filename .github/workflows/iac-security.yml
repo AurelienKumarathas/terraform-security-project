@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 env:
-  TF_VERSION: '1.6.0'
+  TF_VERSION: '1.9.0'
 
 permissions:
   contents: read
@@ -77,7 +77,13 @@ jobs:
             --format sarif \
             --out /output/tfsec-results.sarif \
             --soft-fail || true
-          cp tfsec-output/tfsec-results.sarif tfsec-results.sarif || echo '{"version":"2.1.0","runs":[]}' > tfsec-results.sarif
+          if [ -f tfsec-output/tfsec-results.sarif ]; then
+            cp tfsec-output/tfsec-results.sarif tfsec-results.sarif
+          else
+            cat <<'EOF' > tfsec-results.sarif
+          {"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"tfsec","version":"1.0.0","rules":[]}},"results":[]}]}
+          EOF
+          fi
 
       - name: Upload tfsec results
         uses: github/codeql-action/upload-sarif@v3
@@ -154,8 +160,6 @@ jobs:
       - name: Terraform Init
         working-directory: terraform/
         run: terraform init -backend=false -input=false
-        env:
-          TF_CLI_ARGS_init: "-upgrade"
 
       - name: Terraform Validate
         working-directory: terraform/
