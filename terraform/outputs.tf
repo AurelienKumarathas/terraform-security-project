@@ -5,12 +5,12 @@ output "vpc_id" {
 
 output "app_server_id" {
   description = "EC2 instance ID of the application server"
-  value       = aws_instance.app_server.id
+  value       = module.app_server.instance_id
 }
 
 output "data_bucket_arn" {
   description = "ARN of the transaction data S3 bucket"
-  value       = aws_s3_bucket.data_bucket.arn
+  value       = module.data_bucket.bucket_arn
 }
 
 output "db_instance_endpoint" {

@@ -26,6 +26,7 @@ resource "aws_kms_key" "main" {
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -34,7 +35,10 @@ resource "aws_kms_alias" "main" {
   target_key_id = aws_kms_key.main.key_id
 }
 
-# VPC
+# ==========================================
+# Networking
+# ==========================================
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -45,6 +49,7 @@ resource "aws_vpc" "main" {
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -58,6 +63,7 @@ resource "aws_subnet" "private" {
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -71,10 +77,74 @@ resource "aws_subnet" "private_2" {
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
   }
 }
 
+# ==========================================
 # VPC Flow Logs
+# ==========================================
+
+resource "aws_cloudwatch_log_group" "flow_log" {
+  name              = "/aws/vpc/quantumtrade-flow-logs"
+  retention_in_days = 90
+  kms_key_id        = aws_kms_key.main.arn
+
+  tags = {
+    Name        = "quantumtrade-flow-logs"
+    Environment = var.environment
+    Owner       = "platform-team"
+    CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
+  }
+}
+
+data "aws_iam_policy_document" "flow_log_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "flow_log" {
+  name               = "quantumtrade-flow-log-role"
+  assume_role_policy = data.aws_iam_policy_document.flow_log_assume_role.json
+
+  tags = {
+    Name        = "quantumtrade-flow-log-role"
+    Environment = var.environment
+    Owner       = "platform-team"
+    CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
+  }
+}
+
+data "aws_iam_policy_document" "flow_log_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+    ]
+    resources = [
+      aws_cloudwatch_log_group.flow_log.arn,
+      "${aws_cloudwatch_log_group.flow_log.arn}:*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "flow_log" {
+  name   = "quantumtrade-flow-log-policy"
+  role   = aws_iam_role.flow_log.id
+  policy = data.aws_iam_policy_document.flow_log_policy.json
+}
+
 resource "aws_flow_log" "main" {
   iam_role_arn    = aws_iam_role.flow_log.arn
   log_destination = aws_cloudwatch_log_group.flow_log.arn
@@ -86,48 +156,14 @@ resource "aws_flow_log" "main" {
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
   }
 }
 
-resource "aws_cloudwatch_log_group" "flow_log" {
-  name              = "/aws/vpc/quantumtrade-flow-logs"
-  retention_in_days = 90
-  kms_key_id        = aws_kms_key.main.arn
-}
+# ==========================================
+# Security Group
+# ==========================================
 
-resource "aws_iam_role" "flow_log" {
-  name = "quantumtrade-flow-log-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action    = "sts:AssumeRole"
-      Effect    = "Allow"
-      Principal = { Service = "vpc-flow-logs.amazonaws.com" }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy" "flow_log" {
-  name   = "quantumtrade-flow-log-policy"
-  role   = aws_iam_role.flow_log.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents",
-        "logs:DescribeLogGroups",
-        "logs:DescribeLogStreams"
-      ]
-      Resource = "*"
-    }]
-  })
-}
-
-# Security Group - least privilege
 resource "aws_security_group" "app_sg" {
   name        = "quantumtrade-app-sg"
   description = "Security group for application servers - no public ingress"
@@ -147,10 +183,15 @@ resource "aws_security_group" "app_sg" {
     Environment = var.environment
     Owner       = "app-team"
     CostCenter  = "APP-001"
+    ManagedBy   = "terraform"
   }
 }
 
-# Logging bucket for S3 access logs
+# ==========================================
+# S3 Buckets (via hardened module)
+# ==========================================
+
+# Dedicated logging bucket — receives access logs from all other buckets
 module "log_bucket" {
   source = "./modules/s3"
 
@@ -161,7 +202,7 @@ module "log_bucket" {
   log_bucket_id = ""
 }
 
-# Transaction data bucket - hardened via module
+# Transaction data bucket
 module "data_bucket" {
   source = "./modules/s3"
 
@@ -173,7 +214,10 @@ module "data_bucket" {
   log_bucket_id     = module.log_bucket.bucket_id
 }
 
-# Application server - hardened via module
+# ==========================================
+# EC2 Application Server (via hardened module)
+# ==========================================
+
 module "app_server" {
   source = "./modules/ec2"
 
@@ -188,7 +232,10 @@ module "app_server" {
   kms_key_id         = aws_kms_key.main.arn
 }
 
-# DB Subnet Group
+# ==========================================
+# RDS PostgreSQL
+# ==========================================
+
 resource "aws_db_subnet_group" "main" {
   name       = "quantumtrade-db-subnet"
   subnet_ids = [aws_subnet.private.id, aws_subnet.private_2.id]
@@ -198,10 +245,10 @@ resource "aws_db_subnet_group" "main" {
     Environment = var.environment
     Owner       = "data-team"
     CostCenter  = "DATA-001"
+    ManagedBy   = "terraform"
   }
 }
 
-# RDS PostgreSQL - hardened
 resource "aws_db_instance" "main" {
   identifier        = "quantumtrade-db"
   engine            = "postgres"
@@ -216,11 +263,11 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.main.name
 
-  storage_encrypted       = true
-  kms_key_id              = aws_kms_key.main.arn
-  deletion_protection     = true
-  backup_retention_period = 7
-  multi_az                = true
+  storage_encrypted                   = true
+  kms_key_id                          = aws_kms_key.main.arn
+  deletion_protection                 = true
+  backup_retention_period             = 7
+  multi_az                            = true
   iam_database_authentication_enabled = true
   auto_minor_version_upgrade          = true
 
@@ -231,5 +278,6 @@ resource "aws_db_instance" "main" {
     Environment = var.environment
     Owner       = "data-team"
     CostCenter  = "DATA-001"
+    ManagedBy   = "terraform"
   }
 }
