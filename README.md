@@ -20,6 +20,18 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 
 ---
 
+## Pipeline in Action
+
+![Pipeline Overview](screenshots/pipeline-overview.png)
+
+*All five security jobs passing in 36 seconds — Checkov, tfsec, OPA, Terraform Validate, and Security Summary. Every scanner ✅ Passed with findings uploaded to the GitHub Security tab as SARIF.*
+
+![Pipeline Annotations](screenshots/pipeline-annotations.png)
+
+*Checkov annotations surfaced directly in GitHub Actions — check IDs, severity, and affected resources visible at the CI run level. Remaining findings are medium/low severity checks outside the scope of this hardening engagement (see [Skipped & Out-of-Scope Checks](#skipped--out-of-scope-checks) below).*
+
+---
+
 ## Business Context
 
 | Item | Detail |
@@ -100,6 +112,7 @@ terraform-security-project/
 │   ├── main.tf                    # Root module (references hardened modules)
 │   ├── variables.tf               # Input variables
 │   ├── outputs.tf                 # Key resource identifiers
+│   ├── tfplan.json                # Pre-generated plan for OPA evaluation (see note below)
 │   └── modules/
 │       ├── s3/main.tf             # Hardened S3 module
 │       └── ec2/main.tf            # Hardened EC2 module
@@ -108,6 +121,9 @@ terraform-security-project/
 │       ├── required_tags.rego     # Enforce Owner, Environment, CostCenter
 │       ├── ec2_instance_types.rego # Block t2 instances in production
 │       └── s3_versioning.rego     # Require versioning on production buckets
+├── screenshots/
+│   ├── pipeline-overview.png      # Live pipeline run — all jobs passing
+│   └── pipeline-annotations.png  # Checkov annotations in GitHub Actions
 ├── docs/
 │   ├── SOC2_CONTROL_MAPPING.md    # SOC 2 Trust Service Criteria mapping
 │   └── SECURITY_REPORT.md        # Full security assessment report
@@ -143,6 +159,8 @@ opa eval --format pretty \
   --input terraform/tfplan.json \
   "data.terraform"
 ```
+
+> **Note on `tfplan.json`:** This file is pre-generated for CI demonstration purposes. In a production environment, `terraform plan` would run in CI with AWS credentials injected as GitHub Secrets, generating the plan fresh on every push — ensuring OPA always evaluates the current state of the infrastructure code.
 
 ---
 
@@ -182,6 +200,26 @@ Every resource in the vulnerable baseline was missing mandatory business tags, m
 | `aws_s3_bucket.data_bucket` | ✅ | ❌ | ❌ |
 | `aws_security_group.app_sg` | ❌ | ❌ | ❌ |
 | `aws_vpc.main` | ❌ | ❌ | ❌ |
+
+---
+
+## Skipped & Out-of-Scope Checks
+
+The pipeline is configured to hard-fail on all critical and high severity findings — every one of those is resolved on `main`. The checks below are either documented false positives or medium/low severity controls outside the scope of an IaC security hardening engagement.
+
+| Check ID | Description | Reason |
+|----------|-------------|--------|
+| CKV_AWS_135 | EBS optimisation not enabled | False positive — `t3.medium` enables EBS optimisation natively. Checkov does not account for instance types with built-in optimisation. |
+| CKV2_AWS_6 | S3 public access block | False positive — enforced inside the S3 module via `aws_s3_bucket_public_access_block`. Checkov misses resource-level blocks when scanning at the module call site. |
+| CKV_AWS_144 | S3 cross-region replication | Out of scope — disaster recovery control requiring a second AWS region, separate KMS keys, and IAM replication roles. A business continuity decision, not a security hardening baseline. |
+| CKV2_AWS_62 | S3 event notifications | Out of scope — observability control requiring a downstream SNS/SQS/Lambda consumer. Separate workstream from IaC security hardening. |
+| CKV2_AWS_60 | RDS copy tags to snapshots | Out of scope — operational tagging control for snapshot management. Not a direct attack surface issue. |
+| CKV2_AWS_30 | RDS query logging | Out of scope — audit logging control. Sits under a separate logging and monitoring workstream. |
+| CKV_AWS_353 | RDS performance insights | Out of scope — observability control, not a security misconfiguration. |
+| CKV_AWS_118 | RDS enhanced monitoring | Out of scope — operational monitoring, not a security misconfiguration. |
+| CKV_AWS_338 | CloudWatch log retention ≥ 1 year | Out of scope — compliance control (SOC 2, PCI-DSS) set as part of a formal log retention policy, not IaC hardening. |
+
+> In a production engagement, out-of-scope items would be tracked in a risk register with documented acceptance, owner, and review date.
 
 ---
 
@@ -297,6 +335,7 @@ opa eval --format pretty \
 - **CI/CD Integration** — GitHub Actions pipeline with SARIF upload to GitHub Security tab, blocking on failure
 - **Compliance Mapping** — SOC 2 Trust Service Criteria mapped to specific scan findings with evidence
 - **Defence in Depth** — Three independent tools each catching different issue classes; no single point of failure in the scanning strategy
+- **Risk Management** — Documented false positives and out-of-scope items with written justification, mirroring real-world risk acceptance processes
 
 ---
 
