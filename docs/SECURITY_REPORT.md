@@ -1,6 +1,6 @@
 # QuantumTrade IaC Security Assessment Report
 
-**Date:** 2026-04-17  
+**Date:** 2026-04-24  
 **Assessor:** Aurelien Kumarathas  
 **Scope:** Terraform infrastructure code — `terraform/` directory  
 **Tools:** Checkov v3.2.510 | tfsec v1.28.14 | OPA v0.63.0  
@@ -30,8 +30,8 @@ This report presents findings from automated static analysis security scanning o
 | CRITICAL | 0 | 0 | ✅ Resolved |
 | HIGH | 0 | 0 | ✅ Resolved |
 | MEDIUM | 0 | 0 | ✅ Resolved |
-| LOW | 2 | 0 | 📝 Accepted — documented below |
-| **Total** | **2** | **0** | **89% reduction from original** |
+| LOW | 1 | 0 | 📝 Accepted — documented below |
+| **Total** | **1** | **0** | **95% reduction from original** |
 
 ### OPA Custom Policy Results — `main` branch
 
@@ -191,18 +191,17 @@ This report presents findings from automated static analysis security scanning o
 
 ---
 
-### LOW Findings (Accepted)
+### LOW Findings
 
 #### LOW-01: EC2 Not EBS Optimised (False Positive)
 - **Checkov:** CKV_AWS_135
 - **Note:** `t3.medium` has EBS optimisation enabled by default — Checkov flag is a false positive for this instance type. Accepted and documented in `.checkov.yaml`.
-- **Status:** 📝 Accepted
+- **Status:** 📝 Accepted — documented false positive
 
-#### LOW-02: S3 No Abort Incomplete Multipart Upload Rule
+#### ~~LOW-02: S3 No Abort Incomplete Multipart Upload Rule~~ ✅ Resolved
 - **Checkov:** CKV_AWS_300
-- **Issue:** Missing `abort_incomplete_multipart_upload` lifecycle block — partial uploads accumulate cost
-- **Resolution:** Add `abort_incomplete_multipart_upload { days_after_initiation = 7 }` to S3 module lifecycle rule
-- **Status:** 📝 Minor — scheduled improvement
+- **Resolution:** `abort_incomplete_multipart_upload { days_after_initiation = 7 }` block present in the S3 module lifecycle configuration (`terraform/modules/s3/main.tf`). CKV_AWS_300 passes when scanning the module directly.
+- **Status:** ✅ Resolved
 
 ---
 
@@ -235,7 +234,7 @@ Every resource in the original `main.tf` was missing required business tags, mak
 | S3 public access | All `false` | All `true` — hardcoded in module |
 | S3 versioning | Disabled | Enabled |
 | S3 access logging | None | Dedicated log bucket |
-| S3 lifecycle | None | Standard-IA (90d), Glacier (180d) |
+| S3 lifecycle | None | Standard-IA (90d), Glacier (180d), abort multipart (7d) |
 | EC2 EBS encryption | `false` | `true` + KMS CMK |
 | EC2 IMDSv2 | Not enforced | `http_tokens = required` |
 | EC2 monitoring | Disabled | Enabled |
@@ -248,7 +247,7 @@ Every resource in the original `main.tf` was missing required business tags, mak
 | VPC flow logs | Disabled | CloudWatch Logs, 90d retention |
 | SSH ingress | `0.0.0.0/0` | No ingress rules |
 | Resource tagging | 0/3 tags | 3/3 required (enforced in modules) |
-| **Checkov failures** | **19** | **2 (accepted)** |
+| **Checkov failures** | **19** | **1 (accepted false positive)** |
 | **tfsec failures** | **19** | **0** |
 | **OPA violations** | **23** | **0** |
 
@@ -260,11 +259,11 @@ See [`docs/SOC2_CONTROL_MAPPING.md`](SOC2_CONTROL_MAPPING.md) for full SOC 2 Tru
 
 ## Recommendations (Next Steps)
 
-1. **Add S3 abort multipart lifecycle rule** — resolves LOW-02, clears the remaining 2 Checkov flags
-2. **Implement AWS Config rules** — continuous compliance monitoring post-deployment
-3. **Enable GuardDuty** — runtime threat detection for EC2 and S3
-4. **Add RDS Performance Insights** — `performance_insights_enabled = true`
-5. **Integrate Snyk or Trivy** — extend scanning to container images and application dependencies
+1. **Implement AWS Config rules** — continuous compliance monitoring post-deployment; detects drift if someone manually changes a security group via the console
+2. **Enable GuardDuty** — runtime threat detection for EC2, S3, and RDS; catches anomalous API calls and credential misuse that static scanning cannot detect
+3. **Add RDS Performance Insights** — `performance_insights_enabled = true`; resolves CKV_AWS_353, provides SOC 2 CC7.1 observability evidence
+4. **Integrate Snyk or Trivy container scanning** — extends defence-in-depth to the workload layer; IaC hardening secures the infrastructure but not the container images running on it
+5. **Formalise risk register** — document out-of-scope items (CKV_AWS_144 cross-region replication, CKV2_AWS_62 event notifications) with owner, acceptance date, and review cadence
 
 ---
 
@@ -280,4 +279,4 @@ See [`docs/SOC2_CONTROL_MAPPING.md`](SOC2_CONTROL_MAPPING.md) for full SOC 2 Tru
 
 ---
 
-*Assessment completed: 2026-04-17 | [terraform-security-project](https://github.com/AurelienKumarathas/terraform-security-project)*
+*Assessment completed: 2026-04-24 | [terraform-security-project](https://github.com/AurelienKumarathas/terraform-security-project)*

@@ -1,0 +1,21 @@
+# CODEOWNERS — terraform-security-project
+# All changes require review from the repository owner.
+# This mirrors enterprise security team ownership hygiene where
+# IaC, policy, and workflow files have a designated gatekeeper.
+
+# Default owner for everything
+* @AurelienKumarathas
+
+# Terraform infrastructure — explicit ownership
+/terraform/ @AurelienKumarathas
+
+# OPA policies — policy changes are security-sensitive
+/policies/ @AurelienKumarathas
+
+# GitHub Actions workflows — supply chain attack surface
+/.github/workflows/ @AurelienKumarathas
+
+# Security and compliance documentation
+/docs/ @AurelienKumarathas
+SECURITY.md @AurelienKumarathas
+SECURITY-FINDINGS.md @AurelienKumarathas

@@ -6,12 +6,18 @@ on:
     paths:
       - 'terraform/**'
       - 'policies/**'
+      - 'docs/**'
   pull_request:
     branches: [main]
     paths:
       - 'terraform/**'
       - 'policies/**'
+      - 'docs/**'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   TF_VERSION: '1.6.0'
