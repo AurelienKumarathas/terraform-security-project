@@ -165,27 +165,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
       - name: Terraform Format Check
-        working-directory: terraform/
-        run: terraform fmt -check -recursive
+        run: |
+          docker run --rm \
+            -v "$(pwd)/terraform:/workspace" \
+            -w /workspace \
+            hashicorp/terraform:1.6.0 \
+            fmt -check -recursive
 
-      - name: Terraform Init
-        working-directory: terraform/
-        run: terraform init -backend=false -input=false
-        env:
-          TF_SKIP_PROVIDER_VERIFY: 1
-
-      - name: Terraform Validate
-        working-directory: terraform/
-        run: terraform validate
-        env:
-          AWS_DEFAULT_REGION: eu-west-2
-          TF_VAR_db_password: "dummy-for-validation"
+      - name: Terraform Init and Validate
+        run: |
+          docker run --rm \
+            -v "$(pwd)/terraform:/workspace" \
+            -w /workspace \
+            -e AWS_DEFAULT_REGION=eu-west-2 \
+            -e TF_VAR_db_password=dummy-for-validation \
+            hashicorp/terraform:1.6.0 \
+            sh -c "terraform init -backend=false -input=false && terraform validate"
 
   # ==========================================
   # Security Summary
