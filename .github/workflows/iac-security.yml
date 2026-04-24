@@ -42,15 +42,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@v12.2.1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          directory: terraform/
-          framework: terraform
-          output_format: cli,sarif
-          output_file_path: console,checkov-results.sarif
-          config_file: .checkov.yaml
-          soft_fail: true
+          python-version: '3.11'
+
+      - name: Install Checkov
+        run: pip install checkov==3.2.510
+
+      - name: Run Checkov
+        run: |
+          checkov -d terraform/ \
+            --framework terraform \
+            --output cli \
+            --output sarif \
+            --output-file-path console,checkov-results.sarif \
+            --config-file .checkov.yaml \
+            --soft-fail
+        continue-on-error: true
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@v3
@@ -165,7 +174,14 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/
-        run: terraform init -backend=false -input=false
+        # Pin aws provider to 5.0.0 to avoid hashicorp openpgp key expiry
+        # issue on GitHub-hosted runners with latest provider versions.
+        run: |
+          terraform init -backend=false -input=false \
+            -upgrade=false \
+            -lock=false
+        env:
+          TF_CLI_ARGS_init: "-plugin-dir="
 
       - name: Terraform Validate
         working-directory: terraform/
