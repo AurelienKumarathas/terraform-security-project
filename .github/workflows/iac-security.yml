@@ -165,23 +165,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Terraform Format Check
+      - name: Install Terraform via apt
         run: |
-          docker run --rm --entrypoint sh \
-            -v "$(pwd)/terraform:/workspace" \
-            -w /workspace \
-            hashicorp/terraform:1.6.0 \
-            -c "terraform fmt -check -recursive"
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update -qq && sudo apt-get install -y terraform=${{ env.TF_VERSION }}-1
 
-      - name: Terraform Init and Validate
-        run: |
-          docker run --rm --entrypoint sh \
-            -v "$(pwd)/terraform:/workspace" \
-            -w /workspace \
-            -e AWS_DEFAULT_REGION=eu-west-2 \
-            -e TF_VAR_db_password=dummy-for-validation \
-            hashicorp/terraform:1.6.0 \
-            -c "terraform init -backend=false -input=false && terraform validate"
+      - name: Terraform Format Check
+        working-directory: terraform/
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: terraform/
+        run: terraform init -backend=false -input=false
+        env:
+          TF_SKIP_PROVIDER_VERIFY: 1
+
+      - name: Terraform Validate
+        working-directory: terraform/
+        run: terraform validate
+        env:
+          AWS_DEFAULT_REGION: eu-west-2
+          TF_VAR_db_password: "dummy-for-validation"
 
   # ==========================================
   # Security Summary
