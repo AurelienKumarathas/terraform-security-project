@@ -174,11 +174,17 @@ jobs:
         working-directory: terraform/
         run: terraform fmt -check -recursive
 
+      - name: Refresh HashiCorp GPG key
+        # The OpenPGP key bundled in the ubuntu-latest runner image has expired.
+        # Fetch the current key from HashiCorp's keyserver so provider signature
+        # verification passes. This is the canonical fix per HashiCorp support.
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --batch --yes --import
+          gpg --list-keys
+
       - name: Terraform Init
         working-directory: terraform/
-        # Use -upgrade=false and -lock=false to avoid hashicorp/aws openpgp
-        # key expiry issue on GitHub-hosted runners with latest provider versions.
-        run: terraform init -backend=false -input=false -upgrade=false -lock=false
+        run: terraform init -backend=false -input=false
 
       - name: Terraform Validate
         working-directory: terraform/
