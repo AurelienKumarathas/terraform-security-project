@@ -3,7 +3,7 @@
 Manual code review of Terraform configuration against CIS AWS Benchmark.
 
 > This manual review demonstrates the value of automated scanning — each of these findings
-> would be caught instantly by Checkov or Trivy IaC, eliminating hours of manual effort.
+> would be caught instantly by Checkov or tfsec, eliminating hours of manual effort.
 
 ---
 
@@ -38,7 +38,7 @@ Manual code review of Terraform configuration against CIS AWS Benchmark.
 #### S3 — No Encryption at Rest
 - **CIS Benchmark**: 2.1.1
 - **Risk**: Data stored unencrypted — violates compliance requirements (PCI-DSS, HIPAA, GDPR)
-- **Fix**: Add `server_side_encryption_configuration` block with AES-256 or aws:kms
+- **Fix**: Add `server_side_encryption_configuration` block with `sse_algorithm = "aws:kms"`
 
 #### Security Group — SSH Open to 0.0.0.0/0
 - **CIS Benchmark**: 5.2
@@ -82,8 +82,8 @@ automatically by:
 
 | Tool | What it catches |
 |---|---|
-| **Checkov** | All of the above in seconds |
-| **Trivy IaC** | Same findings + additional misconfigurations |
-| **OPA/Rego** | Custom policy enforcement at plan time |
+| **Checkov** | All of the above plus 2,500+ additional CIS Benchmark rules |
+| **tfsec** | AWS-specific rules with CRITICAL/HIGH/MEDIUM/LOW severity ratings |
+| **OPA/Rego** | Custom policy enforcement at plan time — business rules no commercial tool knows |
 
-See `policies/checkov` and `policies/opa` for the automated equivalents.
+See `.checkov.yaml`, `.tfsec/`, and `policies/opa/` for the automated equivalents.

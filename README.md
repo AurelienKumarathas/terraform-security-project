@@ -50,7 +50,7 @@ The pipeline runs automatically on every push and pull request via GitHub Action
  Push / Pull Request
         │
         ▼
-┌───────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────┐
 │              GitHub Actions Pipeline               │
 │                                                   │
 │  ┌──────────┐  ┌──────────┐  ┌─────────────────┐ │
@@ -70,7 +70,7 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 │              │ Security       │                   │
 │              │ Summary        │                   │
 │              └────────────────┘                   │
-└───────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────┘
         │                    │
         ▼                    ▼
  GitHub Security Tab    Pipeline blocks
@@ -127,6 +127,7 @@ terraform-security-project/
 ├── docs/
 │   ├── SOC2_CONTROL_MAPPING.md    # SOC 2 Trust Service Criteria mapping
 │   └── SECURITY_REPORT.md        # Full security assessment report
+├── SECURITY.md                    # Responsible disclosure policy
 └── SECURITY-FINDINGS.md          # Consolidated findings with fix examples
 ```
 
@@ -160,7 +161,7 @@ opa eval --format pretty \
   "data.terraform"
 ```
 
-> **Note on `tfplan.json`:** This file is pre-generated for CI demonstration purposes. In a production environment, `terraform plan` would run in CI with AWS credentials injected as GitHub Secrets, generating the plan fresh on every push — ensuring OPA always evaluates the current state of the infrastructure code.
+> **Note on `tfplan.json`:** This file is pre-generated for portfolio CI — no AWS credentials are available in this environment. In production, `terraform plan` would run in CI with credentials injected as GitHub Secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), generating a fresh plan on every push and ensuring OPA always evaluates the current infrastructure state.
 
 ---
 
@@ -218,6 +219,8 @@ The pipeline is configured to hard-fail on all critical and high severity findin
 | CKV_AWS_353 | RDS performance insights | Out of scope — observability control, not a security misconfiguration. |
 | CKV_AWS_118 | RDS enhanced monitoring | Out of scope — operational monitoring, not a security misconfiguration. |
 | CKV_AWS_338 | CloudWatch log retention ≥ 1 year | Out of scope — compliance control (SOC 2, PCI-DSS) set as part of a formal log retention policy, not IaC hardening. |
+
+> **Pipeline soft-fail note:** Checkov and tfsec are configured with `soft_fail: true` in this portfolio pipeline — this means the workflow reports findings without blocking the push, since there are no AWS credentials available to generate a live plan. In a production pipeline, both scanners would hard-fail on any CRITICAL or HIGH finding, blocking the PR from merging until the issue is resolved.
 
 > In a production engagement, out-of-scope items would be tracked in a risk register with documented acceptance, owner, and review date.
 
@@ -323,6 +326,19 @@ opa eval --format pretty \
 | [`docs/SOC2_CONTROL_MAPPING.md`](docs/SOC2_CONTROL_MAPPING.md) | SOC 2 TSC mapping — CC6, CC7, CC8, CC9 with evidence |
 | [`docs/SECURITY_REPORT.md`](docs/SECURITY_REPORT.md) | Full security assessment with all findings and remediation status |
 | [`SECURITY-FINDINGS.md`](SECURITY-FINDINGS.md) | Consolidated findings from Checkov and tfsec with fix code examples |
+| [`SECURITY.md`](SECURITY.md) | Responsible disclosure policy |
+
+---
+
+## What I Would Do Next
+
+This project covers the IaC static analysis and policy-as-code layer. In a real production engagement, the next workstreams would be:
+
+- **AWS GuardDuty** — enable runtime threat detection across EC2, S3, and RDS. GuardDuty uses ML to detect anomalous API calls, credential misuse, and data exfiltration patterns that static scanning cannot catch, because they only emerge from live behaviour.
+- **AWS Config Rules** — continuous compliance monitoring post-deployment. Where Checkov and tfsec scan code before it deploys, Config rules verify the live infrastructure matches the intended state and alert on drift — e.g. if someone manually opens port 22 via the console, Config catches it immediately.
+- **Snyk or Trivy (container scanning)** — extend the defence-in-depth approach to container images and application dependencies. IaC hardening secures the infrastructure layer; image scanning secures the workload running on top of it. Both layers need coverage for a complete DevSecOps pipeline.
+- **RDS Performance Insights + Enhanced Monitoring** — resolves the two remaining Checkov LOW findings (CKV_AWS_353, CKV_AWS_118) and provides the database observability layer needed for SOC 2 CC7.1 evidence.
+- **S3 abort incomplete multipart upload rule** — adds `abort_incomplete_multipart_upload { days_after_initiation = 7 }` to the S3 module lifecycle block, clearing the final Checkov LOW finding (CKV_AWS_300) and preventing silent cost accumulation from abandoned uploads.
 
 ---
 
