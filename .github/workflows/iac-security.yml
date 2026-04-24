@@ -167,21 +167,21 @@ jobs:
 
       - name: Terraform Format Check
         run: |
-          docker run --rm \
+          docker run --rm --entrypoint sh \
             -v "$(pwd)/terraform:/workspace" \
             -w /workspace \
             hashicorp/terraform:1.6.0 \
-            fmt -check -recursive
+            -c "terraform fmt -check -recursive"
 
       - name: Terraform Init and Validate
         run: |
-          docker run --rm \
+          docker run --rm --entrypoint sh \
             -v "$(pwd)/terraform:/workspace" \
             -w /workspace \
             -e AWS_DEFAULT_REGION=eu-west-2 \
             -e TF_VAR_db_password=dummy-for-validation \
             hashicorp/terraform:1.6.0 \
-            sh -c "terraform init -backend=false -input=false && terraform validate"
+            -c "terraform init -backend=false -input=false && terraform validate"
 
   # ==========================================
   # Security Summary
