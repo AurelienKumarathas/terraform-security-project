@@ -1,9 +1,9 @@
 # SOC 2 Control Mapping for QuantumTrade Infrastructure
-**Document Version:** 1.0  
-**Date:** 2026-03-20  
+**Document Version:** 1.1  
+**Date:** 2026-04-24  
 **Author:** Aurelien Kumarathas  
 **Project:** terraform-security-project  
-**Tools Used:** Checkov v3.2.510 | tfsec v1.28.14 | OPA v0.71 | Terraform v1.14.4
+**Tools Used:** Checkov v3.2.510 | tfsec v1.28.14 | OPA v0.63.0 | Terraform v1.6.0
 
 ---
 
@@ -85,7 +85,7 @@ Remediation reduced Checkov failures by **89%** (19 → 2) and tfsec failures by
 |------|--------|
 | **Control** | Customer-managed KMS keys with rotation enabled |
 | **Implementation** | `enable_key_rotation = true`, `deletion_window_in_days = 7` |
-| **File** | `terraform/main_secure.tf` lines 57-66 |
+| **File** | `terraform/main.tf` |
 | **Checkov** | CKV_AWS_7 — ✅ PASSED, CKV_AWS_227 — ✅ PASSED, CKV_AWS_33 — ✅ PASSED |
 
 ---
@@ -236,7 +236,7 @@ Remediation reduced Checkov failures by **89%** (19 → 2) and tfsec failures by
 |------|--------|
 | **Control** | Infrastructure changes reviewed before apply |
 | **Implementation** | `terraform plan` generates `tfplan.json` for review |
-| **Evidence** | `terraform/tfplan.json` (gitignored — contains sensitive data) |
+| **Note** | In this portfolio project `tfplan.json` is pre-generated — in production it would be generated fresh on every push via AWS credentials injected as GitHub Secrets |
 
 ---
 
@@ -266,7 +266,7 @@ The OPA policy engine identified **23 tag compliance violations** across all res
 
 | Risk | Severity | Justification | Compensating Control | Review Date |
 |------|----------|---------------|---------------------|-------------|
-| SSH open to 0.0.0.0/0 in demo `main.tf` | CRITICAL | Intentionally insecure for demonstration purposes | Only in `main.tf` (insecure version), not in modules | N/A — demo only |
+| SSH open to 0.0.0.0/0 in demo `main.tf` | CRITICAL | Intentionally insecure for demonstration purposes | Only in `test-security-scan` branch `main.tf`, not in hardened modules | N/A — demo only |
 | RDS not encrypted in demo `main.tf` | HIGH | Intentionally insecure for demonstration purposes | Remediated in secure modules | N/A — demo only |
 | S3 lifecycle missing abort rule | LOW | Minor compliance gap in module | Add `abort_incomplete_multipart_upload` block | Next sprint |
 | EBS not optimised in EC2 module | LOW | `t3.medium` has EBS optimisation by default despite check | Instance type handles this natively | Next sprint |
@@ -298,20 +298,31 @@ The OPA policy engine identified **23 tag compliance violations** across all res
 |------|---------|
 | Checkov | 3.2.510 |
 | tfsec | 1.28.14 |
-| OPA | 0.71 |
-| Terraform | 1.14.4 |
+| OPA | 0.63.0 |
+| Terraform | 1.6.0 |
 | AWS Provider | 5.100.0 |
 
-## Appendix B — Scan Evidence Files
+> All versions are pinned in the CI pipeline (`iac-security.yml`) for deterministic, reproducible scan results.
 
-| File | Contents |
-|------|---------|
-| `checkov-results.json` | Full Checkov scan of original `main.tf` |
-| `tfsec-results.json` | Full tfsec scan of original `main.tf` |
-| `tfsec-results.sarif` | SARIF format for GitHub Security tab |
-| `checkov-modules-results.txt` | Checkov scan of secure modules |
-| `tfsec-modules-results.txt` | tfsec scan of secure modules |
-| `opa-results.json` | OPA custom policy evaluation results |
+## Appendix B — Scan Evidence
+
+Scan results are uploaded to the **GitHub Security tab** as SARIF artefacts on every pipeline run — this is the canonical source of evidence for all Checkov and tfsec findings.
+
+To reproduce results locally:
+
+```bash
+# Checkov
+checkov -d terraform/ --output json > checkov-results.json
+
+# tfsec
+tfsec terraform/ --format json > tfsec-results.json
+
+# OPA
+opa eval --format pretty \
+  --data policies/opa/ \
+  --input terraform/tfplan.json \
+  "data.terraform" > opa-results.json
+```
 
 ## Appendix C — CIS Benchmark Mappings
 
@@ -325,4 +336,4 @@ The OPA policy engine identified **23 tag compliance violations** across all res
 
 ---
 
-*Report generated: 2026-03-20 | terraform-security-project*
+*Report generated: 2026-04-24 | terraform-security-project*
