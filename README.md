@@ -5,7 +5,7 @@
 ![Checkov](https://img.shields.io/badge/Checkov-v3.2.510-brightgreen)
 ![tfsec](https://img.shields.io/badge/tfsec-v1.28.14-brightgreen)
 ![OPA](https://img.shields.io/badge/OPA-v0.63.0-brightgreen)
-![Terraform](https://img.shields.io/badge/Terraform-v1.6.0-blue)
+![Terraform](https://img.shields.io/badge/Terraform-v1.6.6-blue)
 ![AWS](https://img.shields.io/badge/AWS-eu--west--2-orange)
 
 ## Overview
