@@ -7,12 +7,14 @@ on:
       - 'terraform/**'
       - 'policies/**'
       - 'docs/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
     paths:
       - 'terraform/**'
       - 'policies/**'
       - 'docs/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -174,14 +176,9 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/
-        # Pin aws provider to 5.0.0 to avoid hashicorp openpgp key expiry
-        # issue on GitHub-hosted runners with latest provider versions.
-        run: |
-          terraform init -backend=false -input=false \
-            -upgrade=false \
-            -lock=false
-        env:
-          TF_CLI_ARGS_init: "-plugin-dir="
+        # Use -upgrade=false and -lock=false to avoid hashicorp/aws openpgp
+        # key expiry issue on GitHub-hosted runners with latest provider versions.
+        run: terraform init -backend=false -input=false -upgrade=false -lock=false
 
       - name: Terraform Validate
         working-directory: terraform/
