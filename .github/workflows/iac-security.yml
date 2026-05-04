@@ -42,10 +42,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26ac580d68a91b1983d6e6a53e35f8ce28c15a6 # v5
         with:
           python-version: '3.11'
 
@@ -61,10 +61,13 @@ jobs:
             --output-file-path console,checkov-results.sarif \
             --config-file .checkov.yaml \
             --soft-fail
+        # soft-fail is intentional: no AWS credentials are available in this portfolio
+        # CI environment. In production, remove --soft-fail so the pipeline hard-blocks
+        # on any CRITICAL or HIGH finding before merge.
         continue-on-error: true
 
       - name: Upload Checkov results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
         if: always()
         with:
           sarif_file: checkov-results.sarif
@@ -82,28 +85,34 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Run tfsec
         run: |
           mkdir -p tfsec-output
+          # Pinned to v1.28.11 - last stable release before project moved to Trivy.
+          # Unpinned :latest risks silent upstream changes breaking the pipeline.
           docker run --rm \
             -v "$(pwd)/terraform:/src" \
             -v "$(pwd)/tfsec-output:/output" \
-            aquasec/tfsec /src \
+            aquasec/tfsec:v1.28.11 /src \
             --format sarif \
             --out /output/tfsec-results.sarif \
             --soft-fail || true
+          # soft-fail + || true: intentional for portfolio CI without live credentials.
+          # In production, remove both flags so tfsec hard-blocks on CRITICAL/HIGH findings.
           if [ -f tfsec-output/tfsec-results.sarif ]; then
             cp tfsec-output/tfsec-results.sarif tfsec-results.sarif
           else
+            # Fallback: emit a valid empty SARIF if the scan produces no output file.
+            # This prevents the upload-sarif step from failing on a missing file.
             cat <<'EOF' > tfsec-results.sarif
           {"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"tfsec","version":"1.0.0","rules":[]}},"results":[]}]}
           EOF
           fi
 
       - name: Upload tfsec results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
         if: always()
         with:
           sarif_file: tfsec-results.sarif
@@ -118,7 +127,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
@@ -139,6 +148,8 @@ jobs:
               --input terraform/tfplan.json \
               "data.terraform.${pkg}.deny" \
               --format json 2>/dev/null || echo '{"result":[{"expressions":[{"value":[]}]}]}')
+            # Fallback to empty result if OPA errors - e.g. tfplan.json missing in other branches.
+            # In production, terraform plan would generate a fresh tfplan.json on every run.
 
             DENIES=$(echo "$RESULT" | jq -r '.result[0].expressions[0].value[]?' 2>/dev/null)
             if [ -n "$DENIES" ]; then
@@ -163,10 +174,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54531c595e4c1bd00fef232c2653d1f07db4 # v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 

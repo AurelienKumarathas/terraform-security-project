@@ -3,7 +3,7 @@
 [![IaC Security Pipeline](https://github.com/AurelienKumarathas/terraform-security-project/actions/workflows/iac-security.yml/badge.svg)](https://github.com/AurelienKumarathas/terraform-security-project/actions/workflows/iac-security.yml)
 
 ![Checkov](https://img.shields.io/badge/Checkov-v3.2.510-brightgreen)
-![tfsec](https://img.shields.io/badge/tfsec-v1.28.14-brightgreen)
+![tfsec](https://img.shields.io/badge/tfsec-v1.28.11-brightgreen)
 ![OPA](https://img.shields.io/badge/OPA-v0.63.0-brightgreen)
 ![Terraform](https://img.shields.io/badge/Terraform-v1.6.6-blue)
 ![AWS](https://img.shields.io/badge/AWS-eu--west--2-orange)
@@ -73,8 +73,8 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 └─────────────────────────────────────────────────┘
         │                    │
         ▼                    ▼
- GitHub Security Tab    Pipeline blocks
- (SARIF findings)       on any failure
+ GitHub Security Tab    Findings uploaded
+ (SARIF findings)       to Security tab
 ```
 
 ---
@@ -86,7 +86,7 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 | Tool | Passed | Failed | Critical |
 |------|--------|--------|----------|
 | Checkov v3.2.510 | 14 | 19 | 0 |
-| tfsec v1.28.14 | 9 | 19 | 2 |
+| tfsec v1.28.11 | 9 | 19 | 2 |
 | OPA v0.63.0 | — | 23 tag violations | — |
 
 ### Remediated State (`main` branch)
@@ -143,7 +143,7 @@ checkov -d terraform/
 checkov -d terraform/modules/
 ```
 
-### tfsec (Aqua Security) — v1.28.14
+### tfsec (Aqua Security) — v1.28.11
 AWS-specific security rules with severity ratings (CRITICAL/HIGH/MEDIUM/LOW). Catches issues Checkov misses including VPC flow logs and unrestricted egress. Runs with a minimum severity threshold of HIGH in CI.
 
 ```bash
@@ -220,7 +220,7 @@ The pipeline is configured to hard-fail on all critical and high severity findin
 | CKV_AWS_118 | RDS enhanced monitoring | Out of scope — operational monitoring, not a security misconfiguration. |
 | CKV_AWS_338 | CloudWatch log retention ≥ 1 year | Out of scope — compliance control (SOC 2, PCI-DSS) set as part of a formal log retention policy, not IaC hardening. |
 
-> **Pipeline soft-fail note:** Checkov and tfsec are configured with `soft_fail: true` in this portfolio pipeline — this means the workflow reports findings without blocking the push, since there are no AWS credentials available to generate a live plan. In a production pipeline, both scanners would hard-fail on any CRITICAL or HIGH finding, blocking the PR from merging until the issue is resolved.
+> **Pipeline soft-fail note:** Checkov and tfsec are configured with `soft_fail: true` in this portfolio pipeline — this means the workflow reports findings without blocking the push, since there are no AWS credentials available in this environment. In production, both scanners would hard-fail on any CRITICAL or HIGH finding, blocking the PR from merging until the issue is resolved.
 
 > In a production engagement, out-of-scope items would be tracked in a risk register with documented acceptance, owner, and review date.
 
