@@ -24,7 +24,7 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 
 ![Pipeline Overview](screenshots/pipeline-overview.png)
 
-*All five security jobs passing in 36 seconds — Checkov, tfsec, OPA, Terraform Validate, and Security Summary. Every scanner ✅ Passed with findings uploaded to the GitHub Security tab as SARIF.*
+*All five security jobs passing — Checkov, tfsec, OPA, Terraform Validate, and Security Summary. Every scanner ✅ Passed with findings uploaded to the GitHub Security tab as SARIF.*
 
 ![Pipeline Annotations](screenshots/pipeline-annotations.png)
 
@@ -91,11 +91,13 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 
 ### Remediated State (`main` branch)
 
-| Tool | Passed | Failed | Improvement |
-|------|--------|--------|-------------|
-| Checkov | 33 | 2 | 89% reduction |
-| tfsec | 12 | 1 | 95% reduction |
-| OPA | 0 violations | — | 100% resolved |
+| Tool | Passed | Ignored | Failed | Improvement |
+|------|--------|---------|--------|-------------|
+| Checkov v3.2.510 | 33 | 9 | 0 | 100% of critical/high resolved |
+| tfsec v1.28.11 | 32 | 12 | 0 | 100% of critical/high resolved |
+| OPA v0.63.0 | 0 violations | — | — | 100% resolved |
+
+> Ignored checks are documented false positives or out-of-scope controls — see [Skipped & Out-of-Scope Checks](#skipped--out-of-scope-checks) below.
 
 ---
 
@@ -206,12 +208,13 @@ Every resource in the vulnerable baseline was missing mandatory business tags, m
 
 ## Skipped & Out-of-Scope Checks
 
-All critical and high severity findings reported by Checkov and tfsec are resolved on `main`. The checks below are either documented false positives or medium/low severity controls outside the scope of an IaC security hardening engagement.
+All critical and high severity findings are resolved on `main`. The checks below are either documented false positives or medium/low severity controls outside the scope of an IaC security hardening engagement. Each is explicitly configured in `.checkov.yaml` or `.tfsec/config.yml` with a written justification.
 
 | Check ID | Description | Reason |
 |----------|-------------|--------|
 | CKV_AWS_135 | EBS optimisation not enabled | False positive — `t3.medium` enables EBS optimisation natively. Checkov does not account for instance types with built-in optimisation. |
 | CKV2_AWS_6 | S3 public access block | False positive — enforced inside the S3 module via `aws_s3_bucket_public_access_block`. Checkov misses resource-level blocks when scanning at the module call site. |
+| aws-iam-no-policy-wildcards | IAM policy wildcard | False positive — the `${log_group_arn}:*` suffix in the flow log IAM policy is the AWS-required ARN format for CloudWatch Logs stream operations, not a blanket wildcard. |
 | CKV_AWS_144 | S3 cross-region replication | Out of scope — disaster recovery control requiring a second AWS region, separate KMS keys, and IAM replication roles. A business continuity decision, not a security hardening baseline. |
 | CKV2_AWS_62 | S3 event notifications | Out of scope — observability control requiring a downstream SNS/SQS/Lambda consumer. Separate workstream from IaC security hardening. |
 | CKV2_AWS_60 | RDS copy tags to snapshots | Out of scope — operational tagging control for snapshot management. Not a direct attack surface issue. |
@@ -219,8 +222,6 @@ All critical and high severity findings reported by Checkov and tfsec are resolv
 | CKV_AWS_353 | RDS performance insights | Out of scope — observability control, not a security misconfiguration. |
 | CKV_AWS_118 | RDS enhanced monitoring | Out of scope — operational monitoring, not a security misconfiguration. |
 | CKV_AWS_338 | CloudWatch log retention ≥ 1 year | Out of scope — compliance control (SOC 2, PCI-DSS) set as part of a formal log retention policy, not IaC hardening. |
-
-> **Pipeline soft-fail note:** Checkov and tfsec are configured with `soft_fail: true` in this portfolio pipeline — this means the workflow reports findings without blocking the push, since there are no AWS credentials available in this environment. In production, both scanners would hard-fail on any CRITICAL or HIGH finding, blocking the PR from merging until the issue is resolved.
 
 > In a production engagement, out-of-scope items would be tracked in a risk register with documented acceptance, owner, and review date.
 
@@ -232,8 +233,8 @@ All critical and high severity findings reported by Checkov and tfsec are resolv
 
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
-| Checkov failures | 19 | 2 | −89% |
-| tfsec failures | 19 | 1 | −95% |
+| Checkov failures | 19 | 0 | −100% |
+| tfsec failures | 19 | 0 | −100% |
 | Critical issues | 2 | 0 | −100% |
 | OPA violations | 23 | 0 | −100% |
 
@@ -241,7 +242,7 @@ All critical and high severity findings reported by Checkov and tfsec are resolv
 
 Every bucket created with this module enforces by default:
 
-- ✅ KMS server-side encryption (`sse_algorithm = "aws:kms"`)
+- ✅ KMS server-side encryption with customer-managed key (`kms_master_key_id` required)
 - ✅ All 4 public access block settings set to `true`
 - ✅ Versioning enabled
 - ✅ Access logging to dedicated log bucket
@@ -348,7 +349,7 @@ This project covers the IaC static analysis and policy-as-code layer. In a real 
 - **Policy as Code** — Custom Rego policies in OPA enforcing business-specific rules no commercial tool covers
 - **Threat Modelling** — Identifying real attack vectors: SSRF via IMDSv1, data exfiltration via unrestricted egress, brute-force SSH
 - **Secure Module Design** — Reusable hardened Terraform modules that make the secure path the default path
-- **CI/CD Integration** — GitHub Actions pipeline with SARIF upload to GitHub Security tab; production pattern designed to block merges on security failures
+- **CI/CD Integration** — GitHub Actions pipeline with SARIF upload to GitHub Security tab; hard gates block merges on any CRITICAL or HIGH finding
 - **Compliance Mapping** — SOC 2 Trust Service Criteria mapped to specific scan findings with evidence
 - **Defence in Depth** — Three independent tools each catching different issue classes; no single point of failure in the scanning strategy
 - **Risk Management** — Documented false positives and out-of-scope items with written justification, mirroring real-world risk acceptance processes
