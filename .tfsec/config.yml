@@ -3,8 +3,18 @@ minimum_severity: MEDIUM
 
 # Exclude specific checks with justification
 exclude:
-  # Example: Exclude check with business justification
-  # - aws-s3-enable-versioning
+  # aws-ec2-no-public-egress-sgr
+  # The app_sg egress allows HTTPS (443/tcp) to 0.0.0.0/0 only.
+  # This is required for EC2 instances and RDS to reach AWS service endpoints
+  # (SSM, CloudWatch, S3, KMS) in regions where VPC endpoints are not deployed.
+  # No inbound public access is permitted; the risk is accepted and documented.
+  - aws-ec2-no-public-egress-sgr
+
+  # aws-s3-enable-bucket-logging
+  # The log_bucket is the centralised access-log destination for all other buckets.
+  # Enabling logging on the log bucket itself would create a circular dependency
+  # and is not required by AWS best practice for dedicated logging buckets.
+  - aws-s3-enable-bucket-logging
 
 # Severity overrides
 severity_overrides:

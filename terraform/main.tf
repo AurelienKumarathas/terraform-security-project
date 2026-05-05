@@ -305,6 +305,9 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.main.name
 
+  # SECURITY: Instance is private - not reachable from the public internet
+  publicly_accessible = false
+
   storage_encrypted                   = true
   kms_key_id                          = aws_kms_key.main.arn
   deletion_protection                 = true
