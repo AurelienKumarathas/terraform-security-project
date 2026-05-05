@@ -241,6 +241,7 @@ module "log_bucket" {
   environment   = var.environment
   owner         = "platform-team"
   cost_center   = "PLAT-001"
+  kms_key_arn   = aws_kms_key.main.arn
   log_bucket_id = ""
 }
 
@@ -253,6 +254,7 @@ module "data_bucket" {
   owner             = "data-team"
   cost_center       = "DATA-001"
   enable_versioning = true
+  kms_key_arn       = aws_kms_key.main.arn
   log_bucket_id     = module.log_bucket.bucket_id
 }
 
