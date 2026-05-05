@@ -15,11 +15,37 @@ provider "aws" {
   region = var.aws_region
 }
 
+# ==========================================
+# Data sources
+# ==========================================
+
+data "aws_caller_identity" "current" {}
+
+# ==========================================
+# KMS
+# ==========================================
+
 # KMS key for encryption across all resources
+# Explicit key policy required - satisfies CKV2_AWS_64
 resource "aws_kms_key" "main" {
   description             = "KMS key for QuantumTrade encryption"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EnableRootAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      }
+    ]
+  })
 
   tags = {
     Name        = "quantumtrade-kms"
@@ -46,6 +72,22 @@ resource "aws_vpc" "main" {
 
   tags = {
     Name        = "QuantumTrade VPC"
+    Environment = var.environment
+    Owner       = "platform-team"
+    CostCenter  = "PLAT-001"
+    ManagedBy   = "terraform"
+  }
+}
+
+# Restrict the default security group so it allows no traffic.
+# AWS creates this automatically with every VPC; if left unmanaged it permits
+# all inbound/outbound traffic within the group - satisfies CKV2_AWS_12.
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.main.id
+
+  # Intentionally no ingress or egress blocks - all traffic denied
+  tags = {
+    Name        = "default-restricted"
     Environment = var.environment
     Owner       = "platform-team"
     CostCenter  = "PLAT-001"

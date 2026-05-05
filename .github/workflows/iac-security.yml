@@ -84,9 +84,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Run tfsec
+      - name: Prepare tfsec output directory
         run: |
           mkdir -p tfsec-output
+          chmod 777 tfsec-output
+
+      - name: Run tfsec
+        run: |
           # Pinned to v1.28.11 - last stable release before project moved to Trivy.
           # Unpinned :latest risks silent upstream changes breaking the pipeline.
           docker run --rm \
