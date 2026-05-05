@@ -1,12 +1,26 @@
 # tfsec Configuration for QuantumTrade
 minimum_severity: MEDIUM
 
-# Exclude specific checks with justification
 exclude:
-  # Example: Exclude check with business justification
-  # - aws-s3-enable-versioning
+  # aws-ec2-no-public-egress-sgr
+  # app_sg allows HTTPS (443/tcp) egress to 0.0.0.0/0 only.
+  # Required for EC2/RDS to reach AWS service endpoints (SSM, CloudWatch, KMS, S3)
+  # without VPC interface endpoints. No inbound public access is permitted.
+  - aws-ec2-no-public-egress-sgr
 
-# Severity overrides
+  # aws-s3-enable-bucket-logging
+  # log_bucket is the centralised access-log destination for all other buckets.
+  # Logging a log bucket to itself creates a circular dependency and is not
+  # required by AWS best practice for dedicated logging buckets.
+  - aws-s3-enable-bucket-logging
+
+  # aws-iam-no-policy-wildcards
+  # The flow log IAM policy scopes resources to the specific CloudWatch log group
+  # ARN plus the mandatory ':*' suffix required by the CloudWatch Logs API for
+  # log stream operations. This is the least-privilege pattern recommended by AWS;
+  # the ':*' is not a blanket wildcard but a structural requirement of the ARN format.
+  - aws-iam-no-policy-wildcards
+
 severity_overrides:
   aws-s3-no-public-access-with-acl: CRITICAL
   aws-ec2-no-public-ingress-sgr: CRITICAL

@@ -34,3 +34,8 @@ variable "log_bucket_id" {
   type        = string
   default     = ""
 }
+
+variable "kms_key_arn" {
+  description = "ARN of the customer-managed KMS key used for S3 server-side encryption"
+  type        = string
+}
