@@ -87,19 +87,30 @@ jobs:
           mkdir -p tfsec-output
           chmod 777 tfsec-output
 
-      - name: Run tfsec
+      - name: Run tfsec (console output for visibility)
+        # Run tfsec with human-readable output first so findings appear in the
+        # job log. This step always exits 0 so the SARIF step always runs.
         run: |
-          # Pinned to v1.28.11 - last stable release before project moved to Trivy.
-          # Capture exit code without aborting the step — SARIF must be copied
-          # to the workspace before we can re-raise the failure.
           docker run --rm \
             -v "$(pwd)/terraform:/src" \
+            -v "$(pwd)/.tfsec:/config" \
+            aquasec/tfsec:v1.28.11 /src \
+            --config-file /config/config.yml \
+            --format lovely || true
+
+      - name: Run tfsec (SARIF output + hard gate)
+        # Pinned to v1.28.11 - last stable release before project moved to Trivy.
+        # Captures exit code so SARIF is always copied before re-raising failure.
+        run: |
+          docker run --rm \
+            -v "$(pwd)/terraform:/src" \
+            -v "$(pwd)/.tfsec:/config" \
             -v "$(pwd)/tfsec-output:/output" \
             aquasec/tfsec:v1.28.11 /src \
+            --config-file /config/config.yml \
             --format sarif \
             --out /output/tfsec-results.sarif || TFSEC_EXIT=$?
 
-          # Always copy SARIF so upload-sarif never fails on a missing file
           if [ -f tfsec-output/tfsec-results.sarif ]; then
             cp tfsec-output/tfsec-results.sarif "$GITHUB_WORKSPACE/tfsec-results.sarif"
           else
@@ -107,7 +118,6 @@ jobs:
               > "$GITHUB_WORKSPACE/tfsec-results.sarif"
           fi
 
-          # Re-raise tfsec exit code — hard gate still enforced
           exit ${TFSEC_EXIT:-0}
 
       - name: Upload tfsec results
