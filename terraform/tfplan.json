@@ -1,6 +1,6 @@
 {
   "format_version": "1.2",
-  "terraform_version": "1.6.0",
+  "terraform_version": "1.6.6",
   "variables": {
     "aws_region": { "value": "eu-west-2" },
     "environment": { "value": "production" },
@@ -17,7 +17,15 @@
             "description": "KMS key for QuantumTrade encryption",
             "enable_key_rotation": true,
             "deletion_window_in_days": 7,
-            "tags": { "Name": "quantumtrade-kms", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"EnableRootAccess\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}]}",
+            "tags": { "Name": "quantumtrade-kms", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_kms_alias.main",
+          "type": "aws_kms_alias",
+          "values": {
+            "name": "alias/quantumtrade-main"
           }
         },
         {
@@ -27,7 +35,14 @@
             "cidr_block": "10.0.0.0/16",
             "enable_dns_hostnames": true,
             "enable_dns_support": true,
-            "tags": { "Name": "QuantumTrade VPC", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
+            "tags": { "Name": "QuantumTrade VPC", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_default_security_group.default",
+          "type": "aws_default_security_group",
+          "values": {
+            "tags": { "Name": "default-restricted", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
           }
         },
         {
@@ -36,7 +51,7 @@
           "values": {
             "cidr_block": "10.0.1.0/24",
             "availability_zone": "eu-west-2a",
-            "tags": { "Name": "Private Subnet A", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
+            "tags": { "Name": "Private Subnet A", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
           }
         },
         {
@@ -45,7 +60,32 @@
           "values": {
             "cidr_block": "10.0.2.0/24",
             "availability_zone": "eu-west-2b",
-            "tags": { "Name": "Private Subnet B", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
+            "tags": { "Name": "Private Subnet B", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_cloudwatch_log_group.flow_log",
+          "type": "aws_cloudwatch_log_group",
+          "values": {
+            "name": "/aws/vpc/quantumtrade-flow-logs",
+            "retention_in_days": 90,
+            "tags": { "Name": "quantumtrade-flow-logs", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_iam_role.flow_log",
+          "type": "aws_iam_role",
+          "values": {
+            "name": "quantumtrade-flow-log-role",
+            "tags": { "Name": "quantumtrade-flow-log-role", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_flow_log.main",
+          "type": "aws_flow_log",
+          "values": {
+            "traffic_type": "ALL",
+            "tags": { "Name": "quantumtrade-flow-logs", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
           }
         },
         {
@@ -54,7 +94,15 @@
           "values": {
             "name": "quantumtrade-app-sg",
             "description": "Security group for application servers - no public ingress",
-            "tags": { "Name": "App Security Group", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001" }
+            "tags": { "Name": "App Security Group", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "aws_db_subnet_group.main",
+          "type": "aws_db_subnet_group",
+          "values": {
+            "name": "quantumtrade-db-subnet",
+            "tags": { "Name": "DB Subnet Group", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001", "ManagedBy": "terraform" }
           }
         },
         {
@@ -71,53 +119,8 @@
             "multi_az": true,
             "iam_database_authentication_enabled": true,
             "auto_minor_version_upgrade": true,
-            "tags": { "Name": "QuantumTrade Database", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001" }
-          }
-        },
-        {
-          "address": "module.data_bucket.aws_s3_bucket.this",
-          "type": "aws_s3_bucket",
-          "values": {
-            "bucket": "quantumtrade-transaction-data-production",
-            "tags": { "Name": "quantumtrade-transaction-data-production", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001" }
-          }
-        },
-        {
-          "address": "module.data_bucket.aws_s3_bucket_versioning.this",
-          "type": "aws_s3_bucket_versioning",
-          "values": {
-            "bucket": "quantumtrade-transaction-data-production",
-            "versioning_configuration": [{ "status": "Enabled" }]
-          }
-        },
-        {
-          "address": "module.data_bucket.aws_s3_bucket_server_side_encryption_configuration.this",
-          "type": "aws_s3_bucket_server_side_encryption_configuration",
-          "values": {
-            "bucket": "quantumtrade-transaction-data-production",
-            "rule": [{ "apply_server_side_encryption_by_default": [{ "sse_algorithm": "aws:kms" }] }]
-          }
-        },
-        {
-          "address": "module.data_bucket.aws_s3_bucket_public_access_block.this",
-          "type": "aws_s3_bucket_public_access_block",
-          "values": {
-            "bucket": "quantumtrade-transaction-data-production",
-            "block_public_acls": true,
-            "block_public_policy": true,
-            "ignore_public_acls": true,
-            "restrict_public_buckets": true
-          }
-        },
-        {
-          "address": "module.data_bucket.aws_s3_bucket_lifecycle_configuration.this",
-          "type": "aws_s3_bucket_lifecycle_configuration",
-          "values": {
-            "bucket": "quantumtrade-transaction-data-production",
-            "rule": [
-              { "id": "transition-to-ia", "status": "Enabled", "transition": [{ "days": 90, "storage_class": "STANDARD_IA" }] },
-              { "id": "transition-to-glacier", "status": "Enabled", "transition": [{ "days": 180, "storage_class": "GLACIER" }] }
-            ]
+            "publicly_accessible": false,
+            "tags": { "Name": "QuantumTrade Database", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001", "ManagedBy": "terraform" }
           }
         },
         {
@@ -125,7 +128,26 @@
           "type": "aws_s3_bucket",
           "values": {
             "bucket": "quantumtrade-logs-production",
-            "tags": { "Name": "quantumtrade-logs-production", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
+            "tags": { "Name": "quantumtrade-logs-production", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "module.log_bucket.aws_s3_bucket_server_side_encryption_configuration.this",
+          "type": "aws_s3_bucket_server_side_encryption_configuration",
+          "values": {
+            "bucket": "quantumtrade-logs-production",
+            "rule": [{ "apply_server_side_encryption_by_default": [{ "sse_algorithm": "aws:kms", "kms_master_key_id": "arn:aws:kms:eu-west-2:123456789012:key/mrk-placeholder" }], "bucket_key_enabled": true }]
+          }
+        },
+        {
+          "address": "module.log_bucket.aws_s3_bucket_public_access_block.this",
+          "type": "aws_s3_bucket_public_access_block",
+          "values": {
+            "bucket": "quantumtrade-logs-production",
+            "block_public_acls": true,
+            "block_public_policy": true,
+            "ignore_public_acls": true,
+            "restrict_public_buckets": true
           }
         },
         {
@@ -141,9 +163,59 @@
           "type": "aws_s3_bucket_lifecycle_configuration",
           "values": {
             "bucket": "quantumtrade-logs-production",
-            "rule": [
-              { "id": "transition-to-ia", "status": "Enabled", "transition": [{ "days": 90, "storage_class": "STANDARD_IA" }] }
-            ]
+            "rule": [{ "id": "transition-to-ia", "status": "Enabled", "transition": [{ "days": 90, "storage_class": "STANDARD_IA" }] }]
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket.this",
+          "type": "aws_s3_bucket",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "tags": { "Name": "quantumtrade-transaction-data-production", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001", "ManagedBy": "terraform" }
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket_server_side_encryption_configuration.this",
+          "type": "aws_s3_bucket_server_side_encryption_configuration",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "rule": [{ "apply_server_side_encryption_by_default": [{ "sse_algorithm": "aws:kms", "kms_master_key_id": "arn:aws:kms:eu-west-2:123456789012:key/mrk-placeholder" }], "bucket_key_enabled": true }]
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket_public_access_block.this",
+          "type": "aws_s3_bucket_public_access_block",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "block_public_acls": true,
+            "block_public_policy": true,
+            "ignore_public_acls": true,
+            "restrict_public_buckets": true
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket_versioning.this",
+          "type": "aws_s3_bucket_versioning",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "versioning_configuration": [{ "status": "Enabled" }]
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket_logging.this",
+          "type": "aws_s3_bucket_logging",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "target_bucket": "quantumtrade-logs-production",
+            "target_prefix": "quantumtrade-transaction-data-production/"
+          }
+        },
+        {
+          "address": "module.data_bucket.aws_s3_bucket_lifecycle_configuration.this",
+          "type": "aws_s3_bucket_lifecycle_configuration",
+          "values": {
+            "bucket": "quantumtrade-transaction-data-production",
+            "rule": [{ "id": "transition-to-ia", "status": "Enabled", "transition": [{ "days": 90, "storage_class": "STANDARD_IA" }, { "days": 180, "storage_class": "GLACIER" }], "noncurrent_version_expiration": [{ "noncurrent_days": 90 }], "abort_incomplete_multipart_upload": [{ "days_after_initiation": 7 }] }]
           }
         },
         {
@@ -156,7 +228,7 @@
             "associate_public_ip_address": false,
             "metadata_options": [{ "http_tokens": "required", "http_put_response_hop_limit": 1 }],
             "root_block_device": [{ "encrypted": true, "volume_size": 50 }],
-            "tags": { "Name": "quantumtrade-app", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001" }
+            "tags": { "Name": "quantumtrade-app", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001", "ManagedBy": "terraform" }
           }
         }
       ]
@@ -166,153 +238,95 @@
     {
       "address": "aws_kms_key.main",
       "type": "aws_kms_key",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "description": "KMS key for QuantumTrade encryption",
-          "enable_key_rotation": true,
-          "tags": { "Name": "quantumtrade-kms", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "description": "KMS key for QuantumTrade encryption",
+        "enable_key_rotation": true,
+        "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"EnableRootAccess\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}]}",
+        "tags": { "Name": "quantumtrade-kms", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+      }}
     },
     {
       "address": "aws_vpc.main",
       "type": "aws_vpc",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "cidr_block": "10.0.0.0/16",
-          "tags": { "Name": "QuantumTrade VPC", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "cidr_block": "10.0.0.0/16",
+        "tags": { "Name": "QuantumTrade VPC", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+      }}
+    },
+    {
+      "address": "aws_default_security_group.default",
+      "type": "aws_default_security_group",
+      "change": { "actions": ["create"], "before": null, "after": {
+        "tags": { "Name": "default-restricted", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+      }}
     },
     {
       "address": "aws_security_group.app_sg",
       "type": "aws_security_group",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "name": "quantumtrade-app-sg",
-          "tags": { "Name": "App Security Group", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001" }
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "name": "quantumtrade-app-sg",
+        "tags": { "Name": "App Security Group", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001", "ManagedBy": "terraform" }
+      }}
     },
     {
       "address": "aws_db_instance.main",
       "type": "aws_db_instance",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "identifier": "quantumtrade-db",
-          "engine": "postgres",
-          "instance_class": "db.t3.medium",
-          "storage_encrypted": true,
-          "deletion_protection": true,
-          "multi_az": true,
-          "iam_database_authentication_enabled": true,
-          "tags": { "Name": "QuantumTrade Database", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001" }
-        }
-      }
-    },
-    {
-      "address": "module.data_bucket.aws_s3_bucket.this",
-      "type": "aws_s3_bucket",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-transaction-data-production",
-          "id": "quantumtrade-transaction-data-production",
-          "tags": { "Name": "quantumtrade-transaction-data-production", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001" }
-        }
-      }
-    },
-    {
-      "address": "module.data_bucket.aws_s3_bucket_versioning.this",
-      "type": "aws_s3_bucket_versioning",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-transaction-data-production",
-          "versioning_configuration": [{ "status": "Enabled" }]
-        }
-      }
-    },
-    {
-      "address": "module.data_bucket.aws_s3_bucket_lifecycle_configuration.this",
-      "type": "aws_s3_bucket_lifecycle_configuration",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-transaction-data-production",
-          "rule": [
-            { "id": "transition-to-ia", "status": "Enabled" },
-            { "id": "transition-to-glacier", "status": "Enabled" }
-          ]
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "identifier": "quantumtrade-db",
+        "engine": "postgres",
+        "instance_class": "db.t3.medium",
+        "storage_encrypted": true,
+        "deletion_protection": true,
+        "multi_az": true,
+        "iam_database_authentication_enabled": true,
+        "publicly_accessible": false,
+        "tags": { "Name": "QuantumTrade Database", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001", "ManagedBy": "terraform" }
+      }}
     },
     {
       "address": "module.log_bucket.aws_s3_bucket.this",
       "type": "aws_s3_bucket",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-logs-production",
-          "id": "quantumtrade-logs-production",
-          "tags": { "Name": "quantumtrade-logs-production", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001" }
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "bucket": "quantumtrade-logs-production",
+        "tags": { "Name": "quantumtrade-logs-production", "Environment": "production", "Owner": "platform-team", "CostCenter": "PLAT-001", "ManagedBy": "terraform" }
+      }}
     },
     {
       "address": "module.log_bucket.aws_s3_bucket_versioning.this",
       "type": "aws_s3_bucket_versioning",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-logs-production",
-          "versioning_configuration": [{ "status": "Enabled" }]
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "bucket": "quantumtrade-logs-production",
+        "versioning_configuration": [{ "status": "Enabled" }]
+      }}
     },
     {
-      "address": "module.log_bucket.aws_s3_bucket_lifecycle_configuration.this",
-      "type": "aws_s3_bucket_lifecycle_configuration",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "bucket": "quantumtrade-logs-production",
-          "rule": [
-            { "id": "transition-to-ia", "status": "Enabled" }
-          ]
-        }
-      }
+      "address": "module.data_bucket.aws_s3_bucket.this",
+      "type": "aws_s3_bucket",
+      "change": { "actions": ["create"], "before": null, "after": {
+        "bucket": "quantumtrade-transaction-data-production",
+        "tags": { "Name": "quantumtrade-transaction-data-production", "Environment": "production", "Owner": "data-team", "CostCenter": "DATA-001", "ManagedBy": "terraform" }
+      }}
+    },
+    {
+      "address": "module.data_bucket.aws_s3_bucket_versioning.this",
+      "type": "aws_s3_bucket_versioning",
+      "change": { "actions": ["create"], "before": null, "after": {
+        "bucket": "quantumtrade-transaction-data-production",
+        "versioning_configuration": [{ "status": "Enabled" }]
+      }}
     },
     {
       "address": "module.app_server.aws_instance.this",
       "type": "aws_instance",
-      "change": {
-        "actions": ["create"],
-        "before": null,
-        "after": {
-          "ami": "ami-0abc123456789",
-          "instance_type": "t3.medium",
-          "monitoring": true,
-          "associate_public_ip_address": false,
-          "metadata_options": [{ "http_tokens": "required", "http_put_response_hop_limit": 1 }],
-          "root_block_device": [{ "encrypted": true }],
-          "tags": { "Name": "quantumtrade-app", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001" }
-        }
-      }
+      "change": { "actions": ["create"], "before": null, "after": {
+        "ami": "ami-0abc123456789",
+        "instance_type": "t3.medium",
+        "monitoring": true,
+        "associate_public_ip_address": false,
+        "metadata_options": [{ "http_tokens": "required", "http_put_response_hop_limit": 1 }],
+        "root_block_device": [{ "encrypted": true }],
+        "tags": { "Name": "quantumtrade-app", "Environment": "production", "Owner": "app-team", "CostCenter": "APP-001", "ManagedBy": "terraform" }
+      }}
     }
   ]
 }
