@@ -2,7 +2,7 @@ name: IaC Security Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, enforce-checkov-tfsec]
     paths:
       - 'terraform/**'
       - 'policies/**'
@@ -59,12 +59,9 @@ jobs:
             --output cli \
             --output sarif \
             --output-file-path console,checkov-results.sarif \
-            --config-file .checkov.yaml \
-            --soft-fail
-        # soft-fail is intentional: no AWS credentials are available in this portfolio
-        # CI environment. In production, remove --soft-fail so the pipeline hard-blocks
-        # on any CRITICAL or HIGH finding before merge.
-        continue-on-error: true
+            --config-file .checkov.yaml
+      # On enforce-checkov-tfsec branch we run Checkov as a hard gate to surface any
+      # remaining issues before enabling hard-fail on main.
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
@@ -97,10 +94,9 @@ jobs:
             -v "$(pwd)/tfsec-output:/output" \
             aquasec/tfsec:v1.28.11 /src \
             --format sarif \
-            --out /output/tfsec-results.sarif \
-            --soft-fail || true
-          # soft-fail + || true: intentional for portfolio CI without live credentials.
-          # In production, remove both flags so tfsec hard-blocks on CRITICAL/HIGH findings.
+            --out /output/tfsec-results.sarif
+      # On enforce-checkov-tfsec branch we run tfsec as a hard gate to surface any
+      # remaining issues before enabling hard-fail on main.
           if [ -f tfsec-output/tfsec-results.sarif ]; then
             cp tfsec-output/tfsec-results.sarif tfsec-results.sarif
           else

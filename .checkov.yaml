@@ -11,4 +11,36 @@ skip-check:
   # resource-level blocks when scanning at the module call site.
   - CKV2_AWS_6
 
+  # CKV_AWS_144: S3 cross-region replication — disaster recovery / business continuity
+  # control requiring a second region and separate KMS keys. Tracked as out-of-scope
+  # in README Skipped & Out-of-Scope checks.
+  - CKV_AWS_144
+
+  # CKV2_AWS_62: S3 event notifications — observability control requiring downstream
+  # consumers (SNS/SQS/Lambda). Tracked as out-of-scope in README Skipped & Out-of-Scope
+  # checks and handled under a separate logging/monitoring workstream.
+  - CKV2_AWS_62
+
+  # CKV2_AWS_60: RDS copy tags to snapshots — operational tagging control, not a direct
+  # attack surface issue. Tracked as out-of-scope in README Skipped & Out-of-Scope checks.
+  - CKV2_AWS_60
+
+  # CKV2_AWS_30: RDS query logging — audit logging control owned by the observability
+  # workstream. Tracked as out-of-scope in README Skipped & Out-of-Scope checks.
+  - CKV2_AWS_30
+
+  # CKV_AWS_353: RDS performance insights — observability control, not a security
+  # misconfiguration. Tracked as out-of-scope in README Skipped & Out-of-Scope checks.
+  - CKV_AWS_353
+
+  # CKV_AWS_118: RDS enhanced monitoring — operational monitoring, not a direct
+  # security misconfiguration. Tracked as out-of-scope in README Skipped & Out-of-Scope
+  # checks.
+  - CKV_AWS_118
+
+  # CKV_AWS_338: CloudWatch log retention >= 1 year — compliance/log retention
+  # control set as part of formal policy. Tracked as out-of-scope in README Skipped
+  # & Out-of-Scope checks.
+  - CKV_AWS_338
+
 download-external-modules: false
