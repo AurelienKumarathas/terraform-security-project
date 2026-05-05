@@ -144,7 +144,7 @@ checkov -d terraform/modules/
 ```
 
 ### tfsec (Aqua Security) — v1.28.11
-AWS-specific security rules with severity ratings (CRITICAL/HIGH/MEDIUM/LOW). Catches issues Checkov misses including VPC flow logs and unrestricted egress. Runs with a minimum severity threshold of HIGH in CI.
+AWS-specific security rules with severity ratings (CRITICAL/HIGH/MEDIUM/LOW). Catches issues Checkov misses including VPC flow logs and unrestricted egress. Runs with a minimum severity threshold of MEDIUM in CI, with key checks elevated to CRITICAL via `.tfsec/config.yml`.
 
 ```bash
 tfsec terraform/
@@ -172,7 +172,7 @@ opa eval --format pretty \
 | # | Issue | Tool | Check ID | Real-World Risk |
 |---|-------|------|----------|-----------------|
 | 1 | SSH open to `0.0.0.0/0` on port 22 | tfsec | aws-ec2-no-public-ingress-sgr | Full internet brute-force attack surface |
-| 2 | Unrestricted egress all ports | tfsec | aws-ec2-no-public-egress-sgr | Compromised instance can exfiltrate data anywhere |
+| 2 | Unrestricted egress all ports | tfsec | aws-ec2-no-public-ingress-sgr | Compromised instance can exfiltrate data anywhere |
 
 ### High Issues (Vulnerable Baseline, Sample)
 
@@ -206,7 +206,7 @@ Every resource in the vulnerable baseline was missing mandatory business tags, m
 
 ## Skipped & Out-of-Scope Checks
 
-The pipeline is configured to hard-fail on all critical and high severity findings — every one of those is resolved on `main`. The checks below are either documented false positives or medium/low severity controls outside the scope of an IaC security hardening engagement.
+All critical and high severity findings reported by Checkov and tfsec are resolved on `main`. The checks below are either documented false positives or medium/low severity controls outside the scope of an IaC security hardening engagement.
 
 | Check ID | Description | Reason |
 |----------|-------------|--------|
@@ -348,7 +348,7 @@ This project covers the IaC static analysis and policy-as-code layer. In a real 
 - **Policy as Code** — Custom Rego policies in OPA enforcing business-specific rules no commercial tool covers
 - **Threat Modelling** — Identifying real attack vectors: SSRF via IMDSv1, data exfiltration via unrestricted egress, brute-force SSH
 - **Secure Module Design** — Reusable hardened Terraform modules that make the secure path the default path
-- **CI/CD Integration** — GitHub Actions pipeline with SARIF upload to GitHub Security tab, blocking on failure
+- **CI/CD Integration** — GitHub Actions pipeline with SARIF upload to GitHub Security tab; production pattern designed to block merges on security failures
 - **Compliance Mapping** — SOC 2 Trust Service Criteria mapped to specific scan findings with evidence
 - **Defence in Depth** — Three independent tools each catching different issue classes; no single point of failure in the scanning strategy
 - **Risk Management** — Documented false positives and out-of-scope items with written justification, mirroring real-world risk acceptance processes
