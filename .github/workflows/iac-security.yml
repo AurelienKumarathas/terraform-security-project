@@ -60,7 +60,6 @@ jobs:
             --output sarif \
             --output-file-path console,checkov-results.sarif \
             --config-file .checkov.yaml
-          # On enforce-checkov-tfsec branch Checkov runs as a hard gate.
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
@@ -91,24 +90,25 @@ jobs:
       - name: Run tfsec
         run: |
           # Pinned to v1.28.11 - last stable release before project moved to Trivy.
+          # Capture exit code without aborting the step — SARIF must be copied
+          # to the workspace before we can re-raise the failure.
           docker run --rm \
             -v "$(pwd)/terraform:/src" \
             -v "$(pwd)/tfsec-output:/output" \
             aquasec/tfsec:v1.28.11 /src \
             --format sarif \
-            --out /output/tfsec-results.sarif
-          # On enforce-checkov-tfsec branch tfsec runs as a hard gate.
+            --out /output/tfsec-results.sarif || TFSEC_EXIT=$?
 
-      - name: Copy tfsec SARIF to workspace root
-        if: always()
-        run: |
+          # Always copy SARIF so upload-sarif never fails on a missing file
           if [ -f tfsec-output/tfsec-results.sarif ]; then
             cp tfsec-output/tfsec-results.sarif "$GITHUB_WORKSPACE/tfsec-results.sarif"
           else
-            # Fallback: emit a valid empty SARIF so upload-sarif never fails on a missing file.
             echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"tfsec","version":"1.0.0","rules":[]}},"results":[]}]}' \
               > "$GITHUB_WORKSPACE/tfsec-results.sarif"
           fi
+
+          # Re-raise tfsec exit code — hard gate still enforced
+          exit ${TFSEC_EXIT:-0}
 
       - name: Upload tfsec results
         uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
