@@ -60,8 +60,8 @@ jobs:
             --output sarif \
             --output-file-path console,checkov-results.sarif \
             --config-file .checkov.yaml
-      # On enforce-checkov-tfsec branch we run Checkov as a hard gate to surface any
-      # remaining issues before enabling hard-fail on main.
+          # On enforce-checkov-tfsec branch we run Checkov as a hard gate to surface any
+          # remaining issues before enabling hard-fail on main.
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v4
@@ -95,8 +95,8 @@ jobs:
             aquasec/tfsec:v1.28.11 /src \
             --format sarif \
             --out /output/tfsec-results.sarif
-      # On enforce-checkov-tfsec branch we run tfsec as a hard gate to surface any
-      # remaining issues before enabling hard-fail on main.
+          # On enforce-checkov-tfsec branch we run tfsec as a hard gate to surface any
+          # remaining issues before enabling hard-fail on main.
           if [ -f tfsec-output/tfsec-results.sarif ]; then
             cp tfsec-output/tfsec-results.sarif tfsec-results.sarif
           else
