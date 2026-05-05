@@ -53,3 +53,9 @@ variable "kms_key_id" {
   description = "ARN of the KMS key used to encrypt the EBS root volume"
   type        = string
 }
+
+variable "iam_role_name" {
+  description = "Name of the IAM role and instance profile to create for this EC2 instance"
+  type        = string
+  default     = "ec2-ssm-role"
+}
