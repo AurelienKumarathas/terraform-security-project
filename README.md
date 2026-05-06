@@ -108,21 +108,18 @@ terraform-security-project/
 ├── .github/
 │   └── workflows/
 │       └── iac-security.yml       # Full CI/CD pipeline definition
-├── .checkov.yaml                  # Checkov configuration
-├── .tfsec/                        # tfsec custom configuration
+├── .checkov.yaml                  # Checkov configuration and justified skip rules
+├── .tfsec/                        # tfsec severity overrides
 ├── terraform/
-│   ├── main.tf                    # Root module (references hardened modules)
+│   ├── main.tf                    # Root module (VPC, KMS, SG, flow logs, module calls)
 │   ├── rds.tf                     # RDS subnet group + module invocation
-│   ├── variables.tf               # Input variables
+│   ├── variables.tf               # Input variables with validation
 │   ├── outputs.tf                 # Key resource identifiers
 │   ├── tfplan.json                # Pre-generated plan for OPA evaluation (see note below)
 │   └── modules/
-│       ├── s3/main.tf             # Hardened S3 module
-│       ├── ec2/main.tf            # Hardened EC2 module
-│       └── rds/                   # Hardened RDS module
-│           ├── main.tf            # RDS instance configuration
-│           ├── variables.tf       # RDS module inputs
-│           └── outputs.tf         # RDS module outputs
+│       ├── s3/                    # Hardened S3 module (encryption, versioning, logging, lifecycle)
+│       ├── ec2/                   # Hardened EC2 module (IMDSv2, KMS EBS, SSM-only access)
+│       └── rds/                   # Hardened RDS module (encryption, Multi-AZ, IAM auth, gp3)
 ├── policies/
 │   └── opa/
 │       ├── required_tags.rego     # Enforce Owner, Environment, CostCenter
@@ -130,12 +127,14 @@ terraform-security-project/
 │       └── s3_versioning.rego     # Require versioning on production buckets
 ├── screenshots/
 │   ├── pipeline-overview 2.png    # Live pipeline run — all jobs passing
-│   └── pipeline-annotations 2.png # GitHub Actions annotations — green run, no security findings
+│   └── pipeline-annotations 2.png # GitHub Actions annotations — green run
 ├── docs/
-│   ├── SOC2_CONTROL_MAPPING.md    # SOC 2 Trust Service Criteria mapping
+│   ├── ARCHITECTURE.md            # Infrastructure diagrams, module design, design decisions
+│   ├── SOC2_CONTROL_MAPPING.md    # SOC 2 Trust Service Criteria mapping with evidence
 │   └── SECURITY_REPORT.md        # Full security assessment report
+├── CONTRIBUTING.md                # Local scan commands, branching conventions, module rules
 ├── SECURITY.md                    # Responsible disclosure policy
-└── SECURITY-FINDINGS.md          # Consolidated findings with fix examples
+└── SECURITY-FINDINGS.md          # Full findings register — 19 Checkov + 19 tfsec
 ```
 
 ---
@@ -269,14 +268,16 @@ Every instance created with this module enforces by default:
 
 Every database instance created with this module enforces by default:
 
-- ✅ Storage encrypted with KMS CMK (`kms_key_id` required)
-- ✅ Not publicly accessible
+- ✅ Storage encrypted with KMS CMK (`kms_key_id` required input)
+- ✅ `publicly_accessible = false` — enforced via validation (rejects `true`)
 - ✅ Deletion protection enabled
-- ✅ Automated backups (7-day retention)
+- ✅ Final snapshot on destroy (`skip_final_snapshot = false`)
+- ✅ Automated backups — 7-day minimum enforced via validation
 - ✅ Multi-AZ deployment
 - ✅ IAM database authentication enabled
 - ✅ Auto minor version upgrades
 - ✅ CloudWatch logs exports (postgresql, upgrade)
+- ✅ `gp3` storage type (better performance and cost vs gp2)
 - ✅ `Owner`, `Environment`, `CostCenter` tags required as module inputs
 
 ---
@@ -339,13 +340,15 @@ opa eval --format pretty \
 
 ---
 
-## Compliance Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Infrastructure diagrams, module design, pipeline flow, and key design decisions |
 | [`docs/SOC2_CONTROL_MAPPING.md`](docs/SOC2_CONTROL_MAPPING.md) | SOC 2 TSC mapping — CC6, CC7, CC8, CC9 with evidence |
 | [`docs/SECURITY_REPORT.md`](docs/SECURITY_REPORT.md) | Full security assessment with all findings and remediation status |
-| [`SECURITY-FINDINGS.md`](SECURITY-FINDINGS.md) | Consolidated findings from Checkov and tfsec with fix code examples |
+| [`SECURITY-FINDINGS.md`](SECURITY-FINDINGS.md) | Full findings register — 19 Checkov + 19 tfsec with severity, fix, and justification |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Local scan commands, branching conventions, PR checklist, and module rules |
 | [`SECURITY.md`](SECURITY.md) | Responsible disclosure policy |
 
 ---
