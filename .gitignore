@@ -5,6 +5,10 @@ terraform/.terraform/
 terraform/.terraform.lock.hcl
 terraform/*.test.tf
 
+# In real projects, Terraform plan artefacts are normally ignored; tfplan/tfplan.json are tracked here only for portfolio/demo purposes.
+# *.tfplan
+# tfplan.json
+
 # CI scan artefacts - uploaded to GitHub Security tab via SARIF, not committed
 *.sarif
 checkov-results.json
