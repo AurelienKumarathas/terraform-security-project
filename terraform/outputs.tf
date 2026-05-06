@@ -15,7 +15,7 @@ output "data_bucket_arn" {
 
 output "db_instance_endpoint" {
   description = "RDS PostgreSQL connection endpoint"
-  value       = aws_db_instance.main.endpoint
+  value       = module.rds.db_endpoint
   sensitive   = true
 }
 
