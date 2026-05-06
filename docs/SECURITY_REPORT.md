@@ -3,8 +3,8 @@
 **Date:** 2026-04-24  
 **Assessor:** Aurelien Kumarathas  
 **Scope:** Terraform infrastructure code — `terraform/` directory  
-**Tools:** Checkov v3.2.510 | tfsec v1.28.14 | OPA v0.63.0  
-**Terraform Version:** 1.6.0 | AWS Provider: ~> 5.0  
+**Tools:** Checkov v3.2.510 | tfsec v1.28.11 | OPA v0.63.0  
+**Terraform Version:** 1.6.6 | AWS Provider: ~> 5.0  
 **Region:** eu-west-2 (London)
 
 ---
@@ -230,7 +230,7 @@ Every resource in the original `main.tf` was missing required business tags, mak
 
 | Control | Before | After |
 |---------|--------|-------|
-| S3 encryption | None | KMS (`aws:kms`) |
+| S3 encryption | None | KMS (`aws:kms`) + CMK |
 | S3 public access | All `false` | All `true` — hardcoded in module |
 | S3 versioning | Disabled | Enabled |
 | S3 access logging | None | Dedicated log bucket |
@@ -244,7 +244,9 @@ Every resource in the original `main.tf` was missing required business tags, mak
 | RDS Multi-AZ | Disabled | Enabled |
 | RDS IAM auth | Disabled | Enabled |
 | RDS CloudWatch logs | None | postgresql + upgrade |
+| VPC default SG | Unrestricted | All traffic denied (`aws_default_security_group`) |
 | VPC flow logs | Disabled | CloudWatch Logs, 90d retention |
+| KMS key policy | Default (implicit) | Explicit root account policy |
 | SSH ingress | `0.0.0.0/0` | No ingress rules |
 | Resource tagging | 0/3 tags | 3/3 required (enforced in modules) |
 | **Checkov failures** | **19** | **1 (accepted false positive)** |
@@ -272,9 +274,9 @@ See [`docs/SOC2_CONTROL_MAPPING.md`](SOC2_CONTROL_MAPPING.md) for full SOC 2 Tru
 | Tool | Version |
 |------|---------|
 | Checkov | 3.2.510 |
-| tfsec | 1.28.14 |
+| tfsec | 1.28.11 |
 | OPA | 0.63.0 |
-| Terraform | 1.6.0 |
+| Terraform | 1.6.6 |
 | AWS Provider | hashicorp/aws ~> 5.0 |
 
 ---
