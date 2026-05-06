@@ -22,8 +22,8 @@ resource "aws_db_instance" "this" {
   publicly_accessible = var.publicly_accessible
 
   # SECURITY: Encrypt all data at rest with a customer-managed KMS key
-  storage_encrypted                   = var.storage_encrypted
-  kms_key_id                          = var.kms_key_id
+  storage_encrypted = var.storage_encrypted
+  kms_key_id        = var.kms_key_id
 
   # SECURITY: Prevent accidental deletion of the database
   deletion_protection = var.deletion_protection
