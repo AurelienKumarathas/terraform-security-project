@@ -27,15 +27,19 @@ module "rds" {
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.main.name
 
-  publicly_accessible                   = false
-  storage_encrypted                     = true
-  kms_key_id                            = aws_kms_key.main.arn
-  deletion_protection                   = true
-  backup_retention_period               = 7
-  multi_az                              = true
-  iam_database_authentication_enabled   = true
-  auto_minor_version_upgrade            = true
-  enabled_cloudwatch_logs_exports       = ["postgresql", "upgrade"]
+  publicly_accessible                 = false
+  storage_encrypted                   = true
+  kms_key_id                          = aws_kms_key.main.arn
+  deletion_protection                 = true
+  backup_retention_period             = 7
+  multi_az                            = true
+  iam_database_authentication_enabled = true
+  auto_minor_version_upgrade          = true
+
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+    "upgrade",
+  ]
 
   environment = var.environment
   owner       = "data-team"
