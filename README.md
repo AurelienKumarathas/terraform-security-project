@@ -28,7 +28,7 @@ The pipeline runs automatically on every push and pull request via GitHub Action
 
 ![Pipeline Annotations](screenshots/pipeline-annotations.png)
 
-*Checkov annotations surfaced directly in GitHub Actions — check IDs, severity, and affected resources visible at the CI run level. Remaining findings are medium/low severity checks outside the scope of this hardening engagement (see [Skipped & Out-of-Scope Checks](#skipped--out-of-scope-checks) below).*
+*GitHub Actions Annotations panel from the latest green run — 4 Node.js 20 deprecation warnings for `actions/checkout` (no security findings). All Checkov, tfsec, OPA, and Terraform Validate jobs passed with hard gates enforced on `main`.*
 
 ---
 
@@ -125,7 +125,7 @@ terraform-security-project/
 │       └── s3_versioning.rego     # Require versioning on production buckets
 ├── screenshots/
 │   ├── pipeline-overview.png      # Live pipeline run — all jobs passing
-│   └── pipeline-annotations.png  # Checkov annotations in GitHub Actions
+│   └── pipeline-annotations.png  # GitHub Actions annotations — green run, no security findings
 ├── docs/
 │   ├── SOC2_CONTROL_MAPPING.md    # SOC 2 Trust Service Criteria mapping
 │   └── SECURITY_REPORT.md        # Full security assessment report
